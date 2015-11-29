@@ -5,9 +5,9 @@ Dev tools and common files for developers. Nice vagrant shortcuts, global gitign
 ##Setup
 
 ```
-git clone https://github.com/pelmered/ZSH-Dotfiles.git ~.dotfiles
+git clone https://github.com/pelmered/ZSH-Dotfiles.git ~/.dotfiles
 
-~.dotfiles/install.sh
+~/.dotfiles/install.sh
 ```
 
 ####Add to global git config ( usually ~/.gitconfig ) 
