@@ -1,0 +1,264 @@
+{
+	"_comment1": "Valid terminals include: 'Terminal.app' or 'iTerm'",
+	"_comment2": "Hosts will also be read from your ~/.ssh/config or /etc/ssh_config file, if available",
+	"_comment3": "For more information on how to configure, please see http://fitztrev.github.io/shuttle/",
+	"terminal": "iTerm",
+	"iTerm_version": "stable",
+	"open_in": "new",
+	"inTerminal": "new",
+	"launch_at_login": true,
+	"hosts": [
+		{
+			"Privat": [
+
+				{
+					"name": "WPUnity - Stage",
+					"cmd": "ssh angrycreative@213.180.70.115"
+				},
+
+			]
+		},
+		{
+			"WPUnity": [
+
+				{
+					"name": "WPUnity - Stage",
+					"cmd": "ssh root@188.166.62.65"
+				},
+				{
+					"name": "WPUnity - Prod",
+					"cmd": "ssh wpunity@62.210.108.245"
+				}
+
+			]
+		},
+		{
+			"name": "Anfang",
+			"cmd": "ssh angrycreative@213.180.70.115"
+		},
+		{
+			"name": "Angry Creative (WWW)",
+			"cmd": "ssh angrycreative@31.216.36.6"
+		},
+		{
+			"name": "Angry Creative (Monitor)",
+			"cmd": "ssh angrycreative@213.180.70.22"
+		},
+		{
+			"name": "Enoteket",
+			"cmd": "ssh angrycreative@31.216.32.134"
+		},
+		{
+			"name": "Exxentric",
+			"cmd": "ssh angrycreative@31.216.36.192"
+		},
+		{
+			"name": "Gredelin",
+			"cmd": "ssh angrycreative@31.216.36.33"
+		},
+		{
+			"name": "ICDP",
+			"cmd": "ssh angrycreative@31.216.36.91"
+		},
+		{
+			"name": "Insight Labs (dev/stage)",
+			"cmd": "ssh angrycreative@31.216.32.144"
+		},
+		{
+			"name": "Insight Labs (prod)",
+			"cmd": "ssh angrycreative@31.216.37.94"
+		},
+		{
+			"name": "K A Project",
+			"cmd": "ssh angrycreative@31.216.36.52"
+		},
+		{
+			"name": "Lunda Pensionat",
+			"cmd": "ssh angrycreative@31.216.37.26"
+		},
+		{
+			"name": "Medhelp",
+			"cmd": "ssh angrycreative@31.216.37.182"
+		},
+		{
+			"name": "Norrköpings Trafikskola",
+			"cmd": "ssh angrycreative@31.216.36.84"
+		},
+		{
+			"name": "Raoul Wallenbergskolan",
+			"cmd": "ssh angrycreative@31.216.38.189"
+		},
+		{
+			"name": "Rudolf Steinerskolan",
+			"cmd": "ssh angrycreative@31.216.32.210"
+		},
+		{
+			"name": "Testagram",
+			"cmd": "ssh angrycreative@31.216.36.50"
+		},
+		{
+			"name": "Unikum (dev/stage)",
+			"cmd": "ssh manager@de-2093.d.ipeer.se"
+		},
+		{
+			"name": "Unikum (prod)",
+			"cmd": "ssh manager@de-2092.d.ipeer.se"
+		},
+		{
+			"name": "Unikum (nya)",
+			"cmd": "ssh manager@de-2536.d.ipeer.se"
+		},
+		{
+			"name": "Visionera",
+			"cmd": "ssh angrycreative@31.216.36.108"
+		},
+		{
+			"name": "Welcome Hotel",
+			"cmd": "ssh angrycreative@31.216.38.62"
+		},
+		{
+			"name": "Ren Fuel",
+			"cmd": "ssh angrycreative@31.216.36.134"
+		},
+		{
+			"name": "Miljöbil",
+			"cmd": "ssh angrycreative@31.216.38.78"
+		},
+		{
+			"name": "KomExpress",
+			"cmd": "ssh angrycreative@31.216.37.66"
+		},
+		{
+			"name": "Skyltspektrum",
+			"cmd": "ssh angrycreative@213.180.70.167"
+		},
+		{
+			"name": "African Safari",
+			"cmd": "ssh angrycreative@213.180.70.84"
+		},
+		{
+			"name": "Scandinavian Chain Supplier",
+			"cmd": "ssh angrycreative@31.216.38.191"
+		},
+		{
+			"name": "Berotec",
+			"cmd": "ssh angry@195.28.28.127"
+		},
+		{
+			"name": "Sveriges Kommunikatörer",
+			"cmd": "ssh angrycreative@31.216.37.216"
+		},
+		{
+			"name": "Centsoft",
+			"cmd": "ssh angrycreative@31.216.38.227"
+		},
+		{
+			"name": "AllyTec",
+			"cmd": "ssh angrycreative@31.216.38.45"
+		},
+		{
+			"name": "Flexibelluftbehandling",
+			"cmd": "ssh angrycreative@31.216.36.225"
+		},
+		{
+			"name": "AAC",
+			"cmd": "ssh angrycreative@31.216.32.195"
+		},
+		{
+			"name": "Kyl & Maskin",
+			"cmd": "ssh angrycreative@31.216.37.34"
+		},
+		{
+			"name": "Södertörns fönsterputs",
+			"cmd": "ssh angrycreative@31.216.32.245"
+		},
+		{
+			"name": "Rundgrens utbildning",
+			"cmd": "ssh angrycreative@213.180.70.246"
+		},
+		{
+			"name": "Curt Nicolin Gymnasiet",
+			"cmd": "ssh angrycreative@31.216.36.196"
+		},
+		{
+			"name": "Grapplingligan",
+			"cmd": "ssh angrycreative@31.216.37.17"
+		},
+		{
+			"name": "Fokus (Gamla)",
+			"cmd": "ssh fokus@213.180.72.214"
+		},
+		{
+			"name": "Fokus (Nya)",
+			"cmd": "ssh angrycreative@213.180.72.77"
+		},
+		{
+			"name": "Rot Rör AB",
+			"cmd": "ssh angrycreative@31.216.36.221"
+		},
+		{
+			"name": "Berotec (Nya)",
+			"cmd": "ssh angry@81.94.161.179"
+		},
+		{
+			"name": "FMF",
+			"cmd": "ssh angrycreative@31.216.36.21"
+		},
+		{
+			"name": "Ingenjörsbloggen",
+			"cmd": "ssh angrycreative@5.179.112.35"
+		},
+		{
+			"name": "ICU Scandinavia",
+			"cmd": "ssh angrycreative@5.179.112.108"
+		},
+		{
+			"name": "Lemontree",
+			"cmd": "ssh root@c2235.cloudnet.se"
+		},
+		{
+			"name": "Menigo",
+			"cmd": "ssh angrycreative@5.179.112.190"
+		},
+		{
+			"name": "Pelle Thörnberg Media",
+			"cmd": "ssh angrycreative@5.179.112.34"
+		},
+		{
+			"name": "Enjoy Travel",
+			"cmd": "ssh angrycreative@5.179.112.82"
+		},
+		{
+			"name": "Engelska Skolan",
+			"cmd": "ssh angrycreative@31.216.37.109"
+		},
+		{
+			"name": "Systemstrategerna",
+			"cmd": "ssh angrycreative@31.216.38.82"
+		},
+		{
+			"name": "Båtunionen",
+			"cmd": "ssh angrycreative@5.179.112.122"
+		},
+		{
+			"name": "PRC Engineers",
+			"cmd": "ssh angrycreative@85.159.212.6"
+		},
+		{
+			"name": "Spartan training",
+			"cmd": "ssh angrycreative@5.179.112.192"
+		},
+		{
+			"name": "KFAB / KIAB",
+			"cmd": "ssh angrycreative@185.21.145.88"
+		},
+		{
+			"name": "Delta IT",
+			"cmd": "ssh angryc@91.196.242.115"
+		},
+		{
+			"name": "Lavendla",
+			"cmd": "ssh angrycreative@5.179.112.166"
+		},
+	]
+}	

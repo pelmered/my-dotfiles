@@ -1,0 +1,17 @@
+
+ZSH_THEME=agnoster
+
+# Include .bashrc if exists
+if [ -f ~/.bashrc ]; then
+#   source ~/.bashrc
+    echo ""
+fi
+
+# include .bash_profile if exists
+if [ -f ~/.bash_profile ]; then
+   source ~/.bash_profile
+fi
+
+#source ~/.dotfiles/bash/aliases.sh
+source ~/.dotfiles/bash-loader.sh
+
