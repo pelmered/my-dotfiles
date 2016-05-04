@@ -7,7 +7,11 @@ brew install thefuck
 brew install bash
 
 ln -s ~/.dotfiles/shuttle.json .shuttle.json 
-ln -s ~/.dotfiles/gitignore .gitignore 
+ln -s ~/.dotfiles/gitignore .gitignore
+
+
+# Symlink Sublime text 2 to local bin so we can use "sublime [file]" to open file from terminal
+ln -s /Applications/Sublime\ Text\ 2.app/Contents/SharedSupport/bin/subl /usr/local/bin/sublime
 
 #echo $SHELL_TYPE;
 #echo $ZSH_VERSION;

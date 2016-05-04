@@ -1,5 +1,9 @@
 
 
+# Config file for dotfiles
+config.cfg
+
+
 # Folder view configuration files
 .DS_Store
 Desktop.ini

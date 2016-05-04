@@ -1,16 +1,21 @@
 #!/bin/bash
 
 
-alias shupdate="cd ~/.dotfiles && git pull"
 
 
 # Management
-alias dots="cd ~/.dotfiles && vim"
+alias dotupdate="cd ~/.dotfiles && git pull"
+#alias dots="cd ~/.dotfiles && vim"
 alias reload='source ~/.bash_profile && echo "sourced ~/.bash_profile"'
 alias redot='cd ~/.dotfiles && gpp && rake install; cd -'
 
-alias hosts="sudo nano /etc/hosts"
+alias hosts="sublime /etc/hosts"
+alias khosts="knownhosts"
+alias knownhosts="sublime ~/.ssh/known_hosts"
 alias vrb='vim -c "setf ruby"'
+
+alias dotconf="sublime ~/.dotfiles/config.cfg"
+alias .conf=dotconf
 
 # Shell
 alias la='ls -alh'
@@ -24,11 +29,27 @@ alias ....='cd ../../..'
 alias .....='cd ../../../..'
 alias ip="ifconfig|grep broadcast"  # List IPs
 
+alias tailf="tail -f -n 50 "
+
+# https://github.com/Fykec/sl-mac
+alias sl='/usr/local/bin/sl'
+
+#alias npm=gifi
+
 # TheFuck :)
 # https://github.com/nvbn/thefuck
-#eval "$(thefuck --alias)"
-# You can use whatever you want as an alias, like for Mondays:
-#eval "$(thefuck --alias FUCK)"
+eval "$(thefuck --alias kuk)"
+alias kuken="thefuck"
+alias kk="thefuck"
+
+# SSH
+# Specific boxes. Loaded from config
+for k in "${(@k)ssh_servers}"; do
+
+	alias ssh${k}="${ssh_servers[$k]}"
+
+done
+
 
 # Vagrant
 
@@ -36,17 +57,25 @@ alias ip="ifconfig|grep broadcast"  # List IPs
 alias vup="vagrant up"
 alias vssh="vagrant ssh"
 alias vreload="vagrant --provision reload"
+alias vre="vreload"
 alias vprov="vagrant provision"
 alias vsus="vagrant suspend"
+alias vst="vagrant status"
+
+alias vlist="list_boxes"
+alias .list="list_boxes"
 
 # Specific boxes. Loaded from config
 for k in "${(@k)vagrant_boxes}"; do
 
-	alias ${k}up="vagrantsuspendall && cd ${vagrant_boxes[$k]} && vagrant up"
-	alias ${k}upg="vagrantsuspendall && cd ${vagrant_boxes[$k]} && vagrant up && gulpstart ${k}"
+	alias ${k}up="vagrant_up ${k}"
+	alias ${k}upg="vagrant_up ${k} gulpstart ${k}"
+	#alias ${k}upg="vagrantsuspendall && cd ${vagrant_boxes[$k]} && sleep 1 && vagrant up && gulpstart ${k}"
 	alias ${k}ssh="cd ${vagrant_boxes[$k]} && vagrant ssh"
-	alias ${k}reload="cd ${vagrant_boxes[$k]} && vagrant --provision reload"
+	alias ${k}reload="cd ${vagrant_boxes[$k]} && vagrant reload"
+	alias ${k}reprov="cd ${vagrant_boxes[$k]} && vagrant --provision reload"
 	alias ${k}sus="cd ${vagrant_boxes[$k]} && vagrant suspend"
+	alias ${k}cd="cd ${vagrant_boxes[$k]}"
 
 done
 
@@ -105,6 +134,7 @@ alias gammf="gamm --no-verify"
 alias gba="git rebase --abort"
 alias gbc="git add -A && git rebase --continue"
 alias gbm="git fetch origin master && git rebase origin/master"
+alias gcleanignore=""
 
 # tmux
 alias ta="tmux attach"
