@@ -22,7 +22,7 @@ function watch_sync() {
 		echo "$(date)"
 		#echo $1;
 		rsync -azv $1 $2;
-		sleep 5;
+		sleep $3;
 	done
 }
 
@@ -130,7 +130,54 @@ function list_boxes() {
 	done
 }
 
+# Clean all files from repo that should be ignored
 function clean_gitignore() {
 	git rm --cached `git ls-files -i --exclude-from=.gitignore`
+}
+
+function update_wpcli() {
+
+	curl -L https://raw.github.com/wp-cli/builds/gh-pages/phar/wp-cli.phar > wp-cli.phar;
+	chmod +x wp-cli.phar;
+	which wp | xargs -I {} cp ./wp-cli.phar {};
+	wp --version --allow-root;
+	rm wp-cli.phar
+}
+
+function vvvcreate() {
+
+	SITE_NAME=$1
+
+	echo $SITE_NAME
+
+	mkdir -p ~/projekt/vvv/www/${SITE_NAME}/repo/site/public
+
+	vv create --webroot repo/site/public --debug --images --remove-defaults --path ~/projekt/vvv -n ${SITE_NAME}
+}
+
+function vvvcreatenoproxy() {
+
+	SITE_NAME=$1
+
+	echo $SITE_NAME
+
+	mkdir -p ~/projekt/vvv/www/${SITE_NAME}/repo/site/public
+
+	vv create --webroot repo/site/public --debug --remove-defaults --path ~/projekt/vvv -n ${SITE_NAME}
+}
+
+function homestead() {
+    ( cd ~/Homestead && vagrant $* )
+}
+
+function upgrade_all_casks() {
+	#rm -rf "$(brew --cache)"
+
+	brew cask cleanup
+	brew update
+
+	for app in $(brew cask list); do
+	    brew cask install --force "${app}"
+	done
 }
 

@@ -1,13 +1,9 @@
 #!/bin/bash
 
-
-
-
 # Management
 alias dotupdate="cd ~/.dotfiles && git pull"
-#alias dots="cd ~/.dotfiles && vim"
+alias dots="cd ~/.dotfiles && vim"
 alias reload='source ~/.bash_profile && echo "sourced ~/.bash_profile"'
-alias redot='cd ~/.dotfiles && gpp && rake install; cd -'
 
 alias hosts="sublime /etc/hosts"
 alias khosts="knownhosts"
@@ -50,8 +46,12 @@ for k in "${(@k)ssh_servers}"; do
 
 done
 
+# VMware Dev VM
+alias devssh="ssh peter.elmered@192.168.35.128"
 
-# Vagrant
+###########
+# Vagrant #
+###########
 
 # Generic
 alias vup="vagrant up"
@@ -79,16 +79,11 @@ for k in "${(@k)vagrant_boxes}"; do
 
 done
 
-
 # Portable ls with colors
-if ls --color -d . >/dev/null 2>&1; then
-  alias ls='ls --color=auto'  # Linux
-elif ls -G -d . >/dev/null 2>&1; then
-  alias ls='ls -G'  # BSD/OS X
-fi
+alias ls='ls -G'
 
 # I always forget the common options.
-alias rsync2="echo 'rsync -az --progress server:/path/ path (Slashes are significant.)'"
+alias rsync2="echo 'rsync -azP server:/path/ path (Slashes are significant.)'"
 
 # Ruby on Rails
 alias sc="[ -f script/console ] && script/console || bundle exec rails console"
@@ -106,11 +101,16 @@ alias rsp="rake testbot:spec"
 
 # Git
 alias g="git"
+alias gl="git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr)%Creset' --abbrev-commit --date=relative"
+alias ga="git add"
+alias gap="git add -p"
+alias gc="git commit -m"
 alias gs="git status"
 alias gw="git show"
 alias gw^="git show HEAD^"
 alias gw^^="git show HEAD^^"
 alias gd="git diff HEAD"  # What's changed? Both staged and unstaged.
+alias gds="git diff --staged"  # What's changed? Only staged (added) changes.
 alias gdo="git diff --cached"  # What's changed? Only staged (added) changes.
 # for gco ("git commit only") and gca ("git commit all"), see functions.sh.
 alias gcaf="git add --all && gcof"
@@ -118,6 +118,8 @@ alias gcof="git commit --no-verify -m"
 alias gcac="gca Cleanup."
 alias gcoc="gco Cleanup."
 alias gcaw="gca Whitespace."
+alias gpl='git pull'
+alias gph='git push origin $(git_current_branch)'
 alias gpp='git pull --rebase && git push'
 alias gppp="git push -u"  # Can't pull because you forgot to track? Run this.
 alias gps='(git stash --include-untracked | grep -v "No local changes to save") && gpp && git stash pop || echo "Fail!"'
@@ -145,10 +147,6 @@ alias tcopy="tmux show-buffer | pbcopy"
 # Servers
 alias rst="touch tmp/restart.txt && echo touched tmp/restart.txt"  # Passenger
 
-# Work
-
 # Straight into console-in-screen.
 # Assumes there is only one screen running.
 alias prodc="ssh anpa -t screen -RD"
-
-
