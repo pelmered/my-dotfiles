@@ -1,5 +1,14 @@
 #!/bin/bash
 
+
+function dotcomands() {
+
+	echo "watch - "
+	echo "watch_sync - "
+
+}
+
+
 # Utilities
 
 # Watch command for Mac
@@ -11,10 +20,13 @@ function watch() {
 		echo "$(date)"
 
 		echo $1;
-		#$1;
+		eval $1;
 		sleep $2;
 	done
 }
+
+# Sync folder every X seconds
+# usage: watch_sync <sync from> <sync to> <interval in seconds>
 function watch_sync() {
 	while :;
 		do
@@ -26,8 +38,8 @@ function watch_sync() {
 	done
 }
 
-
-vagrant_up() {
+# Ups vagrant box and ask if you want to suspend running boxes
+function vagrant_up() {
 
 	echo "";
 	echo "";
@@ -49,14 +61,15 @@ vagrant_up() {
 	vagrant up;
 
 }
+
+# Start gulp in default location
 function gulpstart() {
 
 	cd ${vagrant_boxes[$1]}/site && gulp
-
 }
 
+#
 function is_yes() {
-
 
 	if [ ${$1} = "yes" ]; then
 
@@ -69,7 +82,7 @@ function is_yes() {
 
 # SSH functions
 
-
+# Lists all registered (in config.cfg) servers
 function list_servers() {
 	pad=$(printf '%0.1s' " "{1..60})
 
@@ -95,6 +108,7 @@ function list_servers() {
 
 # Vagrant functions
 
+# Suspend all running vagrant boxes
 function vagrantsuspendall() {
 	echo "Suspending all running VMs:"
 	vboxmanage list runningvms
@@ -102,6 +116,7 @@ function vagrantsuspendall() {
 	vboxmanage list runningvms | sed -E 's/.*\{(.*)\}/\1/' | xargs -L1 -I {} VBoxManage controlvm {} savestate
 }
 
+# List all running vagrant boxes
 function vagrantrunning() {
 	echo "List of all running VMs:"
 	vboxmanage list runningvms
@@ -130,38 +145,51 @@ function list_boxes() {
 	done
 }
 
-# Clean all files from repo that should be ignored
-function clean_gitignore() {
-	git rm --cached `git ls-files -i --exclude-from=.gitignore`
+function getsitename() {
+
+	SITE_NAME=$1
+
+	if [[ "$SITE_NAME" = "" ]]; then
+		echo -n "Site name (domain_tld): ";
+		read SITE_NAME
+	fi
+
+	if [[ "$SITE_NAME" = "" ]]; then
+		echo "No site name"
+		return 1;
+	fi
 }
 
-function update_wpcli() {
-
-	curl -L https://raw.github.com/wp-cli/builds/gh-pages/phar/wp-cli.phar > wp-cli.phar;
-	chmod +x wp-cli.phar;
-	which wp | xargs -I {} cp ./wp-cli.phar {};
-	wp --version --allow-root;
-	rm wp-cli.phar
-}
-
+# Create new VVV site wizard
 function vvvcreate() {
 
-	SITE_NAME=$1
+	getsitename;
 
-	echo $SITE_NAME
+	echo "Creating site: ${SITE_NAME}"
 
-	mkdir -p ~/projekt/vvv/www/${SITE_NAME}/repo/site/public
+	echo "Proceed? (Y/n) ";
+	echo "";
 
-	vv create --webroot repo/site/public --debug --images --remove-defaults --path ~/projekt/vvv -n ${SITE_NAME}
+	read REPLY;
+
+	if [[ "$REPLY" != "n" ]]; then
+		#mkdir -p ~/projekt/vvv/www/${SITE_NAME}/repo/site/public
+		vv create --webroot repo/site/public --debug --images --remove-defaults --path ~/projekt/vvv -n ${SITE_NAME}
+	else
+		echo "Aborted"
+	fi
+
 }
 
+# Create new VVV site without proxy wizard
 function vvvcreatenoproxy() {
 
-	SITE_NAME=$1
+	getsitename;
 
-	echo $SITE_NAME
+	echo "Creating site: ${SITE_NAME}"
+	return 1;
 
-	mkdir -p ~/projekt/vvv/www/${SITE_NAME}/repo/site/public
+	#mkdir -p ~/projekt/vvv/www/${SITE_NAME}/repo/site/public
 
 	vv create --webroot repo/site/public --debug --remove-defaults --path ~/projekt/vvv -n ${SITE_NAME}
 }
@@ -170,14 +198,178 @@ function homestead() {
     ( cd ~/Homestead && vagrant $* )
 }
 
+# Clean all files from repo that should be ignored
+function clean_gitignore() {
+	git rm --cached `git ls-files -i --exclude-from=.gitignore`
+}
+
+function update_wpcli() {
+	curl -L https://raw.github.com/wp-cli/builds/gh-pages/phar/wp-cli.phar > wp-cli.phar;
+	chmod +x wp-cli.phar;
+	which wp | xargs -I {} cp ./wp-cli.phar {};
+	wp --version --allow-root;
+	rm wp-cli.phar
+}
+
+# Update all homebrew casks packages (use with caution)
 function upgrade_all_casks() {
 	#rm -rf "$(brew --cache)"
 
 	brew cask cleanup
 	brew update
 
-	for app in $(brew cask list); do
+	#for app in $(brew cask list); do
+	for app in $(brew cask outdated); do
+		#echo "${app}";
 	    brew cask install --force "${app}"
 	done
 }
 
+# Upload and add ssh key to remote server for key auth
+function addmysshkey() {
+
+	REMOTE_HOST=$1
+
+	if [ -z ${REMOTE_HOST} ]; then
+
+		echo "Need to must specify remote host";
+		echo "addmysshkey username@remotehost.com";
+
+	else
+
+		cat ~/.ssh/id_rsa.pub | ssh ${REMOTE_HOST} "mkdir -p ~/.ssh; touch ~/.ssh/authorized_keys; cat - >> ~/.ssh/authorized_keys";
+		echo "Added!";
+
+	fi
+}
+
+# Rsync wizzard (If you can't remember the parameters)
+function rsyncw() {
+
+	echo "";
+	echo "";
+	echo "Rsync step by step Wizzard";
+	echo "";
+
+	echo "";
+	echo "Specify source. Should end with / if folder (Leave empty for current dir)";
+	echo "";
+
+	echo -n "Source:";
+	read SOURCE
+
+	if [[ "$SOURCE" = "" ]]; then
+		SOURCE="./"
+	fi
+
+	echo "";
+	echo "Specify destination (Leave empty for current dir)";
+	echo "";
+
+	echo -n "Source:";
+	read -e DESTINATION
+
+	if [[ "$DESTINATION" = "" ]]; then
+		DESTINATION="."
+	fi
+
+	echo "";
+	echo "Specify options without - (Leave empty for -azP)";
+	echo "";
+
+	echo -n "Options:";
+	read -e OPTIONS
+
+	if [[ "$OPTIONS" = "" ]]; then
+		OPTIONS="azP"
+	fi
+
+	echo "";
+	echo "";
+	echo "rsync -${OPTIONS} \"${SOURCE}\" \"${DESTINATION}\"";
+	echo "";
+	echo "Proceed? (Y/n) ";
+	echo "";
+
+	read REPLY;
+
+	if [[ "$REPLY" != "n" ]]; then
+
+		rsync -${OPTIONS} "${SOURCE}" "${DESTINATION}"
+
+	fi
+
+}
+
+# Work In Progress - Run VMWare box in headless mode
+function vmwareheadless() {
+
+	VMRUN_CMD="/Applications/VMware\\ Fusion.app/Contents/Library/vmrun";
+	VMX_PATH="/Users/pelmered/projekt/DevEnv/DevEnv.vmx";
+
+	CMD=$1;
+
+	case "$CMD" in
+		start)
+
+			echo "${VMRUN_CMD} -T start ${VMX_PATH} nogui";
+			${VMRUN_CMD} -T start ${VMX_PATH} nogui
+
+            ;;
+
+		*)
+
+			echo "${VMRUN_CMD} -T ${CMD}  ${VMX_PATH}";
+			${VMRUN_CMD} -T ${CMD} ${VMX_PATH}
+
+	esac
+}
+
+
+function composer_require_wpackagist() {
+
+	SLUG=$1;
+
+	composer require wpackagist-plugin/${SLUG}
+}
+
+# Require
+function composer_require_ac_premium_components() {
+
+	SLUG=$1;
+
+	composer config repositories.${SLUG} git https://git.synotio.se/ac-premiumcomponents/${SLUG}.git
+
+	composer require ac-premiumcomponents/${SLUG}
+}
+
+
+function composer_update_package() {
+
+	PACKAGE=$1;
+	VERSION=$2;
+
+	if [ -z "$VERSION" ]; then
+		VERSION="*";
+	fi
+
+	composer remove ${PACKAGE};
+	composer require "${PACKAGE}:${VERSION}";
+}
+
+function wp_plugin_performance_check() {
+
+SITEURL=$1;
+
+for p in $(wp plugin list --fields=name --status=active --allow-root)
+do
+	echo $p
+	wp plugin deactivate $p --allow-root
+	for i in {1..5}
+	do
+		curl -so /dev/null -w "%{time_total}\n" \
+		-H "Pragma: no-cache" SITEURL
+	done
+	wp plugin activate $p --allow-root
+done
+}
