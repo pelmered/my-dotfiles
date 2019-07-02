@@ -5,7 +5,7 @@
 ###############################################
 alias dotupdate="cd ~/.dotfiles && git pull && reload"
 alias dots="${DOTFILES_EDITOR} ~/.dotfiles"
-alias reload='source ~/.dotfiles/bash-loader.sh && echo "sourced ~/.dotfiles/bash-loader.sh"'
+alias reload='source ~/.dotfiles/loader.sh && echo "sourced ~/.dotfiles/loader.sh"'
 
 alias hosts="${DOTFILES_EDITOR} /etc/hosts"
 alias khosts="knownhosts"
@@ -14,10 +14,37 @@ alias knownhosts="${DOTFILES_EDITOR} ~/.ssh/known_hosts"
 alias dotconf="${DOTFILES_EDITOR} ~/.dotfiles/config.cfg"
 alias .conf=dotconf
 
+# Get macOS Software Updates, and update installed Ruby gems, Homebrew, npm, and their installed packages
+alias update='sudo softwareupdate -i -a; brew update; brew upgrade; brew cleanup; npm install npm -g; npm update -g; sudo gem update --system; sudo gem update; sudo gem cleanup; updatewpcli; upgradeallcasks'
+
+###############################################
+# Formatting & Colors                         #
+###############################################
+# Portable ls with colors
+alias ls='ls -G'
+
+# Always enable colored `grep` output
+# Note: `GREP_OPTIONS="--color=auto"` is deprecated, hence the alias usage.
+alias grep='grep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias egrep='egrep --color=auto'
+
+###############################################
+# Shortcuts                                   #
+###############################################
+alias d="cd ~/Documents/Dropbox"
+alias dl="cd ~/Downloads"
+alias dt="cd ~/Desktop"
+alias p="cd ~/projects"
+alias g="git"
+
 ###############################################
 # Shell                                       #
 ###############################################
-alias la='ls -alh'
+
+alias la='ls -alhF' # List in long format, include dotfiles
+alias l="ls"
+alias ld="ls -ld */"   # List in long format, only directories
 alias cdd='cd -'  # back to last directory
 alias pg='ps aux | head -n1; ps aux | grep -i'
 alias tf='tail -F -n200'
@@ -26,20 +53,84 @@ alias ..='cd ..'
 alias ...='cd ../..'
 alias ....='cd ../../..'
 alias .....='cd ../../../..'
-alias ip="ifconfig|grep broadcast"  # List IPs
+alias ......='cd ../../../../..'
+alias .......='cd ../../../../../..'
+alias ipp="ifconfig|grep broadcast"  # List IPs
 
-alias tailf="tail -f -n 50 "
+alias ip="dig +short myip.opendns.com @resolver1.opendns.com"
+
+
+###############################################
+# Applications                                #
+###############################################
+alias s='sublime'
+alias p='phpstorm'
+alias v='vim'
+alias n='nano'
+
+# Airport CLI alias
+alias airport='/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport'
+
+# Disable Spotlight
+alias spotoff="sudo mdutil -a -i off"
+# Enable Spotlight
+alias spoton="sudo mdutil -a -i on"
+
+# Google Chrome
+alias chrome='/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome'
+alias canary='/Applications/Google\ Chrome\ Canary.app/Contents/MacOS/Google\ Chrome\ Canary'
+
+###############################################
+# Utilities                                   #
+###############################################
+
+# Enable aliases to be sudo’ed
+alias sudo='sudo '
+
+# Get week number
+alias week='date +%V'
+
+# Lock the screen (when going AFK)
+alias afk="/System/Library/CoreServices/Menu\ Extras/User.menu/Contents/Resources/CGSession -suspend"
+
+# Print each PATH entry on a separate line
+alias path='echo -e ${PATH//:/\\n}'
+
+# Recursively remove .DS_Store files
+alias cleanupds="find . -type f -name '*.DS_Store' -ls -delete"
 
 # https://github.com/Fykec/sl-mac
 alias sl='/usr/local/bin/sl'
+
+alias tailf="tail -f -n 50 "
 
 #alias npm=gifi
 
 # TheFuck :)
 # https://github.com/nvbn/thefuck
-eval "$(thefuck --alias kuk)"
-alias kuken="thefuck"
-alias kk="thefuck"
+#eval "$(thefuck --alias kuk)"
+#alias kuken="thefuck"
+
+# Canonical hex dump; some systems have this symlinked
+command -v hd > /dev/null || alias hd="hexdump -C"
+
+# macOS has no `md5sum`, so use `md5` as a fallback
+command -v md5sum > /dev/null || alias md5sum="md5"
+
+# macOS has no `sha1sum`, so use `shasum` as a fallback
+command -v sha1sum > /dev/null || alias sha1sum="shasum"
+
+# Merge PDF files
+# Usage: `mergepdf -o output.pdf input{1,2,3}.pdf`
+alias mergepdf='/System/Library/Automator/Combine\ PDF\ Pages.action/Contents/Resources/join.py'
+
+# Stuff I never really use but cannot delete either because of http://xkcd.com/530/
+alias stfu="osascript -e 'set volume output muted true'"
+alias pumpitup="osascript -e 'set volume output volume 100'"
+
+# Kill all the tabs in Chrome to free up memory
+# [C] explained: http://www.commandlinefu.com/commands/view/402/exclude-grep-from-your-grepped-output-of-ps-alias-included-in-description
+alias chromekill="ps ux | grep '[C]hrome Helper --type=renderer' | grep -v extension-process | tr -s ' ' | cut -d ' ' -f2 | xargs kill"
 
 
 ###############################################
@@ -54,42 +145,64 @@ for k in "${(@k)ssh_servers}"; do
 
 done
 
-alias servers="list_servers"
+alias servers="listservers"
 
-###########
-# Vagrant #
-###########
+###############################################
+# Docker                                      #
+###############################################
+
+alias dup="docker-compose up -d"
+alias ddown="docker-compose down"
+alias dd="ddown"
+alias dcu="docker-compose up"
+alias dcub="docker-compose up --build"
+alias dcubd="docker-compose up --build -d"
+alias dph="docker-compose push"
+alias dpl="docker-compose pull"
+alias dre="docker-compose restart"
+alias dssh="docker-compose exec workspace bash"
+
+alias dcbuild="docker-compose up -d --force-recreate --build"
+
+alias dcbash='docker-compose exec --user root phpfpm bash'
+
+
+###############################################
+# Vagrant                                     #
+###############################################
 
 # Generic. Can be run on any vagrant box.
 # Must to be run from Vagrant folder (the folder that contains the Vagrantfile)
 alias vup="vagrant up"
 alias vssh="vagrant ssh"
-alias vreload="vagrant --provision reload"
+alias vreload="vagrant reload"
+alias vreloadpro="vagrant reload --provision"
 alias vre="vreload"
+alias vpre="vreloadpro"
+alias vreprov="vreloadpro"
 alias vprov="vagrant provision"
 alias vsus="vagrant suspend"
 alias vst="vagrant status"
+alias vbu="vagrant box update"
 
-alias vlist="list_boxes"
-alias .list="list_boxes"
-alias boxes="list_boxes"
+alias vlist="listboxes"
+alias .list="listboxes"
+alias boxes="listboxes"
 
 # Specific boxes. Loaded from config
 for k in "${(@k)vagrant_boxes}"; do
 
-	alias ${k}up="vagrant_up ${k}"
-	alias ${k}upg="vagrant_up ${k} gulpstart ${k}"
+	alias ${k}up="vagrantup ${k}"
+	alias ${k}upg="vagrantup ${k} gulpstart ${k}"
 	#alias ${k}upg="vagrantsuspendall && cd ${vagrant_boxes[$k]} && sleep 1 && vagrant up && gulpstart ${k}"
 	alias ${k}ssh="cd ${vagrant_boxes[$k]} && vagrant ssh"
 	alias ${k}reload="cd ${vagrant_boxes[$k]} && vagrant reload"
-	alias ${k}reprov="cd ${vagrant_boxes[$k]} && vagrant --provision reload"
+	alias ${k}reprov="cd ${vagrant_boxes[$k]} && vagrant reload --provision"
 	alias ${k}sus="cd ${vagrant_boxes[$k]} && vagrant suspend"
 	alias ${k}cd="cd ${vagrant_boxes[$k]}"
 
 done
 
-# Portable ls with colors
-alias ls='ls -G'
 
 # I always forget the common options.
 alias rsync2="echo 'rsync -azP server:/path/ path (Slashes are significant.)'"
@@ -108,16 +221,38 @@ alias be="bundle exec"
 alias rsua="bundle exec rake spec:unit:all"
 alias rsp="rake testbot:spec"
 
+
+
+###############################################
+# NPM                                         #
+###############################################
+alias nin="npm install && say -v Fiona 'WoooHoo, Great success'"
+alias nup="npm update"
+
 ###############################################
 # Composer                                    #
 ###############################################
 alias cin="composer install"
 alias cup="composer update"
 alias crq="composer require "
-alias crqp="composer_require_wpackagist "
-alias crqwp="composer_require_wpackagist "
-alias crqac="composer_require_ac_premium_components "
-alias cupp="composer_update_package "
+alias crm="composer remove "
+alias cda="composer dumpautoload "
+alias cdump="cda"
+alias crqwpackagist="composer_require_wpackagist "
+alias crqp="crqwpackagist "
+alias crqwp="crqwpackagist "
+alias crqstatispelmered="composer_require_satis_pelmered "
+alias crqel="crqstatispelmered "
+alias crqpremium="composer_require_premium_components "
+alias cupdatepackage="composer_update_package "
+alias cuppkg="cupdatepackage "
+alias cupp="cupdatepackage "
+alias cupproject="composer_update_project "
+alias coutdated="composer outdated -D "
+alias cout="composer outdated -D "
+
+
+alias wptocomposer="wget https://raw.githubusercontent.com/pelmered/wp-to-composer/master/wp-to-composer.php && php wp-to-composer.php"
 
 ###############################################
 # Git                                         #
@@ -153,6 +288,7 @@ alias gplh='git pull && git push origin $(git_current_branch)   '
 alias gppp="git push -u"  # Can't pull because you forgot to track? Run this.
 alias gps='(git stash --include-untracked | grep -v "No local changes to save") && gpp && git stash pop || echo "Fail!"'
 alias go="git checkout"
+alias gco="git checkout"
 alias gb="git checkout -b"
 alias got="git checkout -"
 alias gom="git checkout master"
@@ -167,6 +303,12 @@ alias gbc="git add -A && git rebase --continue"
 alias gbm="git fetch origin master && git rebase origin/master"
 alias gcleanignore=""
 alias grlc="git reset HEAD~" # Remove last commit
+alias gundo="grlc"
+
+#Merge current branch to master
+alias gmb="git_merge_branch"
+alias grb="git_rebase_branch"
+
 
 # tmux
 alias ta="tmux attach"

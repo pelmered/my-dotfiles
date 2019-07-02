@@ -14,5 +14,10 @@ git clone https://github.com/pelmered/ZSH-Dotfiles.git ~/.dotfiles
 
 ```
 [core]
-        excludesfile = ~/.gitignore
+        excludesfile = ~/.dotfiles/gitignore
+```
+
+####Source the dotfiles loader in your .zshrc ( ~/.zshrc )
+```
+source ~/.dotfiles/loader.sh
 ```
