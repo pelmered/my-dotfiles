@@ -168,6 +168,12 @@ alias dcbash='docker-compose exec --user root phpfpm bash'
 
 
 ###############################################
+# MySQL                                     #
+###############################################
+
+alias cpdb="copy_database"
+
+###############################################
 # Vagrant                                     #
 ###############################################
 
@@ -232,8 +238,10 @@ alias nup="npm update"
 ###############################################
 # Composer                                    #
 ###############################################
+alias composer="COMPOSER_MEMORY_LIMIT=-1 composer"
 alias cin="composer install"
 alias cup="composer update"
+alias cupd="composer update --dry-run"
 alias crq="composer require "
 alias crm="composer remove "
 alias cda="composer dumpautoload "
@@ -253,6 +261,13 @@ alias cout="composer outdated -D "
 
 
 alias wptocomposer="wget https://raw.githubusercontent.com/pelmered/wp-to-composer/master/wp-to-composer.php && php wp-to-composer.php"
+
+###############################################
+# Laravel                                     #
+###############################################
+
+alias art="php artisan"
+alias a="art"
 
 ###############################################
 # Git                                         #
@@ -287,11 +302,13 @@ alias gpps='git stash && git pull --rebase && git push && git stash apply'
 alias gplh='git pull && git push origin $(git_current_branch)   '
 alias gppp="git push -u"  # Can't pull because you forgot to track? Run this.
 alias gps='(git stash --include-untracked | grep -v "No local changes to save") && gpp && git stash pop || echo "Fail!"'
-alias go="git checkout"
+#alias go="git checkout"
 alias gco="git checkout"
-alias gb="git checkout -b"
+alias gb="git branch"
+alias gcb="git checkout -b"
 alias got="git checkout -"
 alias gom="git checkout master"
+alias god="git checkout develop"
 alias gr="git branch -d"
 alias grr="git branch -D"
 alias gcp="git cherry-pick"

@@ -11,17 +11,22 @@ function dotcomands() {
 
 # Watch command for Mac
 # usage: watch <your_command> <sleep_duration>
-function watch() {
-	while :;
-		do
-		clear;
-		echo "$(date)"
-
-		echo $1;
-		eval $1;
-		sleep $2;
-	done
-}
+# function watch() {
+#
+# 	command=$1;
+# 	sleep=$2;
+#
+# 	while :;
+# 		do
+# 		clear;
+# 		echo "$(date)"
+#
+# 		echo "Running command: \"${command}\"";
+# 		eval $command;
+# 		echo "Sleeping for ${sleep} seconds";
+# 		sleep $sleep;
+# 	done
+# }
 
 # Sync folder every X seconds
 # usage: watch_sync <sync from> <sync to> <interval in seconds>
@@ -358,12 +363,13 @@ function composer_update_package() {
 	PACKAGE=$1;
 	VERSION=$2;
 
-	if [ -z "$VERSION" ]; then
-		VERSION="*";
-	fi
+	#if [ -z "$VERSION" ]; then
+	#	VERSION="*";
+	#fi
 
 	composer remove ${PACKAGE};
-	composer require "${PACKAGE}:${VERSION}";
+	composer require "${PACKAGE}";
+	#composer require "${PACKAGE}:${VERSION}";
 }
 
 
@@ -386,6 +392,19 @@ function composer_update_project() {
 	fi
 
 	composer outdated --direct
+
+	echo "";
+	echo "";
+	echo "Proceed? (y/N) ";
+	echo "";
+
+	read REPLY;
+
+	if [[ "$REPLY" != "y" ]]; then
+		echo "Aborted";
+		return 1;
+	fi
+
 	composer outdated --direct > outdated.txt;
 
 	php ${DOTFILES_PATH}/update-composer-json-version-numbers-to-latest-version.php;
@@ -664,8 +683,8 @@ function tre() {
 ###############
 function git_merge_branch() {
 
-	CURRENT_BRANCH=$1;
-	TARGET_BRANCH=$2;
+	CURRENT_BRANCH=$2;
+	TARGET_BRANCH=$1;
 
 	#if (( ! ${+CURRENT_BRANCH} )); then
 	if [[ -z $CURRENT_BRANCH ]]; then
@@ -717,14 +736,14 @@ function git_rebase_branch() {
 	CURRENT_BRANCH=$1;
 	TARGET_BRANCH=$2;
 
-	if [ "$CURRENT_BRANCH" == "" ]; then
+	if [[ -z $CURRENT_BRANCH ]]; then
 		CURRENT_BRANCH=$(git_current_branch);
 	fi
-	if [ "$TARGET_BRANCH" == "" ]; then
+	if [[ -z $TARGET_BRANCH ]]; then
 		TARGET_BRANCH="master";
 	fi
 
-	if [ "$CURRENT_BRANCH" == "" ] || [ "$CURRENT_BRANCH" = "master" ]; then
+	if [[ -z $CURRENT_BRANCH ]] || [[ "${CURRENT_BRANCH}" = "master" ]]; then
 		#echo $CURRENT_BRANCH;
 		echo -n "Specify Git branch to rebase: ";
 		read CURRENT_BRANCH
@@ -744,4 +763,9 @@ function git_rebase_branch() {
 	else
 		echo "Aborted"
 	fi
+}
+
+
+function copy_database() {
+	mysql --execute="CREATE DATABASE $2" && mysqldump $1 | mysql $2
 }
