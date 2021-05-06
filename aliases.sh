@@ -275,6 +275,7 @@ alias cupproject="composer_update_project "
 alias coutdated="composer outdated -D "
 alias cout="composer outdated -D "
 
+alias t="composer test"
 
 alias wptocomposer="wget https://raw.githubusercontent.com/pelmered/wp-to-composer/master/wp-to-composer.php && php wp-to-composer.php"
 
@@ -284,6 +285,7 @@ alias wptocomposer="wget https://raw.githubusercontent.com/pelmered/wp-to-compos
 
 alias art="php artisan"
 alias a="art"
+alias at="artisan test"
 
 ###############################################
 # Git                                         #
