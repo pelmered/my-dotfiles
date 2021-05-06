@@ -216,19 +216,6 @@ function updatewpcli() {
 	rm wp-cli.phar
 }
 
-# Update all homebrew casks packages (use with caution)
-function upgradeallcasks() {
-	#rm -rf "$(brew --cache)"
-
-	brew cask cleanup
-	brew update
-
-	#for app in $(brew cask list); do
-	for app in $(brew cask outdated); do
-		#echo "${app}";
-	    brew cask install --force "${app}"
-	done
-}
 
 # Upload and add ssh key to remote server for key auth
 function addmysshkey() {

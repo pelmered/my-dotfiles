@@ -15,7 +15,7 @@ alias dotconf="${DOTFILES_EDITOR} ~/.dotfiles/config.cfg"
 alias .conf=dotconf
 
 # Get macOS Software Updates, and update installed Ruby gems, Homebrew, npm, and their installed packages
-alias update='sudo softwareupdate -i -a; brew update; brew upgrade; brew cleanup; npm install npm -g; npm update -g; sudo gem update --system; sudo gem update; sudo gem cleanup; updatewpcli; upgradeallcasks'
+alias update='sudo softwareupdate -i -a; brew update; brew upgrade; brew cleanup; npm install npm -g; npm update -g; sudo gem update --system; sudo gem update; sudo gem cleanup; composer global update'
 
 ###############################################
 # Formatting & Colors                         #
