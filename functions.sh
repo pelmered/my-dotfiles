@@ -208,6 +208,7 @@ function cleangitignore() {
 	git rm --cached `git ls-files -i --exclude-from=.gitignore`
 }
 
+
 function updatewpcli() {
 	curl -L https://raw.github.com/wp-cli/builds/gh-pages/phar/wp-cli.phar > wp-cli.phar;
 	chmod +x wp-cli.phar;
@@ -755,4 +756,33 @@ function git_rebase_branch() {
 
 function copy_database() {
 	mysql --execute="CREATE DATABASE $2" && mysqldump $1 | mysql $2
+}
+
+
+
+function valet_start() {
+  echo "Starting valet services...";
+  valet start;
+
+  echo "Starting additional services...";
+
+  for valet_service in ${valet_services[@]}; do
+    brew services start $valet_service;
+  done
+}
+
+function valet_stop() {
+  echo "Stopping valet services...";
+  valet stop;
+
+  echo "Stopping additional services...";
+
+  for valet_service in ${valet_services[@]}; do
+    brew services stop $valet_service;
+  done
+}
+
+function valet_restart() {
+  valet_stop;
+  valet_start;
 }

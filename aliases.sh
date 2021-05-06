@@ -209,6 +209,22 @@ for k in "${(@k)vagrant_boxes}"; do
 
 done
 
+###############################################
+# Valet / Brew services                       #
+###############################################
+
+# Setup aliases for all SSH connections loaded from config
+for k in "${(@k)valet_services}"; do
+
+
+
+	alias ssh${k}="${ssh_servers[$k]}"
+	alias ${k}="${ssh_servers[$k]}"
+
+done
+
+alias servers="listservers"
+
 
 # I always forget the common options.
 alias rsync2="echo 'rsync -azP server:/path/ path (Slashes are significant.)'"
