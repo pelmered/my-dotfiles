@@ -67,8 +67,8 @@ foreach($listOfOutdatedPackages as $line) {
             $newVersion = '^' . $matches['latestVersion'];
         }
 
-        if($currentVersion === 'dev-master') {
-            echo sprintf('Current version is "dev-master". Skipping.') . PHP_EOL;
+        if(substr($currentVersion, 0, 4) === 'dev-') {
+            echo sprintf('Current version is "dev-*". Skipping.') . PHP_EOL;
             continue;
         }
         if($currentVersion === $newVersion) {
