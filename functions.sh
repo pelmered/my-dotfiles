@@ -618,13 +618,14 @@ function sublime() {
 
 # `v` with no arguments opens the current directory in Vim, otherwise opens the
 # given location
-function vim() {
-	if [ $# -eq 0 ]; then
-		vim .;
-	else
-		vim "$@";
-	fi;
-}
+#function vim() {
+#	if [ $# -eq 0 ]; then
+#		vim .;
+#	else
+#		vim "$@";
+#	fi;
+#}
+
 
 # `p` with no arguments opens the current directory in PHPStorm, otherwise opens the given location
 # For this to work you need to create a launcher in you PATH: "Tools -> Create Command-line Launcher..."
@@ -785,4 +786,34 @@ function valet_stop() {
 function valet_restart() {
   valet_stop;
   valet_start;
+}
+
+
+function gitpullall() {
+
+	for branch in $(git branch)
+	do
+		echo $branch
+		echo "git pull origin ${branch}"
+	done
+}
+
+function gitpushall() {
+
+	for branch in $(git branch)
+	do
+		echo $branch
+
+		echo "SKIP_POST_CHECKOUT=1 git checkout ${branch}"
+
+		SKIP_POST_CHECKOUT=1 git checkout ${branch}
+
+		echo "git pull origin ${branch}"
+		echo "git push origin ${branch}"
+
+		git pull origin ${branch} --no-verify
+		git push origin ${branch} --no-verify
+
+		sleep 5;
+	done
 }

@@ -5,7 +5,7 @@
 ###############################################
 alias dotupdate="cd ~/.dotfiles && git pull && reload"
 alias dots="${DOTFILES_EDITOR} ~/.dotfiles"
-alias reload='source ~/.dotfiles/loader.sh && echo "sourced ~/.dotfiles/loader.sh"'
+alias reload='source ~/.dotfiles/loader.sh && echo "sourced ~/.dotfiles/loader.sh" && exec zsh'
 
 alias hosts="${DOTFILES_EDITOR} /etc/hosts"
 alias khosts="knownhosts"
@@ -84,6 +84,10 @@ alias canary='/Applications/Google\ Chrome\ Canary.app/Contents/MacOS/Google\ Ch
 # Utilities                                   #
 ###############################################
 
+alias pup='cup && nup';
+alias pupcp='cupcp && nupcp';
+
+
 # Enable aliases to be sudo’ed
 alias sudo='sudo '
 
@@ -153,7 +157,7 @@ alias servers="listservers"
 
 alias dup="docker-compose up -d"
 alias ddown="docker-compose down"
-alias dd="ddown"
+#alias dd="ddown"
 alias dcu="docker-compose up"
 alias dcub="docker-compose up --build"
 alias dcubd="docker-compose up --build -d"
@@ -172,6 +176,8 @@ alias dcbash='docker-compose exec --user root phpfpm bash'
 ###############################################
 
 alias cpdb="copy_database"
+#alias mysql2="/usr/local/bin/mysql"
+#alias mysql="/usr/local/bin/mysql"
 
 ###############################################
 # Vagrant                                     #
@@ -248,8 +254,10 @@ alias rsp="rake testbot:spec"
 ###############################################
 # NPM                                         #
 ###############################################
-alias nin="npm install && say -v Fiona 'WoooHoo, Great success'"
+alias nin="npm install && say -v Fiona 'WooooooHoo, Great success!'"
 alias nup="npm update"
+alias nupcp='npm update && ga package-lock.json && gc "NPM update" && gph'
+alias nr="npm run "
 
 ###############################################
 # Composer                                    #
@@ -258,6 +266,7 @@ alias composer="COMPOSER_MEMORY_LIMIT=-1 composer"
 alias cin="composer install"
 alias cup="composer update"
 alias cupd="composer update --dry-run"
+alias cupcp='composer update && ga composer.lock && ga public/vendor && gc "Composer update" && gph'
 alias crq="composer require "
 alias crm="composer remove "
 alias cda="composer dumpautoload "
@@ -275,7 +284,8 @@ alias cupproject="composer_update_project "
 alias coutdated="composer outdated -D "
 alias cout="composer outdated -D "
 
-alias t="composer test"
+alias ct="composer t"
+alias ctest="composer test"
 
 alias wptocomposer="wget https://raw.githubusercontent.com/pelmered/wp-to-composer/master/wp-to-composer.php && php wp-to-composer.php"
 
@@ -286,6 +296,8 @@ alias wptocomposer="wget https://raw.githubusercontent.com/pelmered/wp-to-compos
 alias art="php artisan"
 alias a="art"
 alias at="artisan test"
+alias t="php artisan test"
+alias tp="t --parallel"
 
 ###############################################
 # Git                                         #
@@ -313,7 +325,7 @@ alias gcof="git commit --no-verify -m"
 alias gcac="gca Cleanup."
 alias gcoc="gco Cleanup."
 alias gcaw="gca Whitespace."
-alias gpl='git pull'
+alias gpl='git pull origin $(git_current_branch)'
 alias gph='git push origin $(git_current_branch)'
 alias gpp='git pull --rebase && git push'
 alias gpps='git stash && git pull --rebase && git push && git stash apply'
@@ -342,6 +354,8 @@ alias gundo="grlc"
 
 #Merge current branch to master
 alias gmb="git_merge_branch"
+alias gmbb="gmb && gco $(git_current_branch)"
+alias gmbpb="gmb && gph && gco $(git_current_branch)"
 alias grb="git_rebase_branch"
 
 
