@@ -1,0 +1,31 @@
+
+dotfiles:
+  editor: sublime
+
+ssh:
+ servers:
+   # comments are allowed
+   myhostkey: # comments are allowed
+     host: 192.168.1.1
+     user: myuser
+
+git:
+  default:
+    branches:
+      main: main
+      dev: dev
+  /Users/username/path/to/the/repo:
+    branches:
+      main: prod
+      dev: dev
+
+#Vagrant boxes
+vagrant:
+  suspend_before_up: yes
+  boxes:
+    vvv: ~/vvv
+    hs: ~/Homestead
+
+docker:
+  containers:
+    mydocker: ~/Projects/docker-project/docker

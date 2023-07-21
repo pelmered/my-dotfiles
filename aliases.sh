@@ -142,12 +142,54 @@ alias chromekill="ps ux | grep '[C]hrome Helper --type=renderer' | grep -v exten
 ###############################################
 
 # Setup aliases for all SSH connections loaded from config
-for k in "${(@k)ssh_servers}"; do
 
-	alias ssh${k}="${ssh_servers[$k]}"
-	alias ${k}="${ssh_servers[$k]}"
+#yq e '.ssh.servers | keys lineComment=""' /Users/peter/.dotfiles/config.yaml
 
-done
+#retun;
+
+#yq e ' to_entries | .key + ", " + .value.host' /Users/peter/.dotfiles/config.yaml
+
+#yq e '.ssh.servers | .key + ", " + .value.host' /Users/peter/.dotfiles/config.yaml
+
+
+#return;
+
+#yq e 'to_entries | .ssh.servers[] | .key + ", " + .value.host' /Users/peter/.dotfiles/config.yaml
+#ssh_servers=$(yq e -o=p -I=0 '.ssh.servers[] | .key .value' /Users/peter/.dotfiles/config.yaml)
+
+#echo $ssh_servers;
+
+
+#return;
+
+#for ssh_server in $(yq e '.ssh.servers' /Users/peter/.dotfiles/config.yaml); do
+#  echo "ssh_server33: ${ssh_server}"
+#done
+
+#yq e -o=p  '.ssh.servers[]' /Users/peter/.dotfiles/config.yaml | while read ssh_server ; do
+
+#  echo "ssh_server22: ${ssh_server}"
+
+#done
+
+#ssh_servers=$(yq e -o=p -I=0 '.ssh.servers' /Users/peter/.dotfiles/config.yaml)
+
+#echo $ssh_servers;
+#for ssh_server in "${ssh_servers[@]}"; do
+#  echo "ssh_server: ${ssh_server}"
+
+#  jq 'keys[]' <<< $ssh_server | while read key ; do
+
+#    echo "key: ${key}"
+
+#  done
+#done
+
+
+#for k in "${(@k)ssh_servers}"; do
+#	alias ssh${k}="${ssh_servers[$k]}"
+#	alias ${k}="${ssh_servers[$k]}"
+#done
 
 alias servers="listservers"
 
@@ -176,8 +218,7 @@ alias dcbash='docker-compose exec --user root phpfpm bash'
 ###############################################
 
 alias cpdb="copy_database"
-#alias mysql2="/usr/local/bin/mysql"
-#alias mysql="/usr/local/bin/mysql"
+
 
 ###############################################
 # Vagrant                                     #
@@ -222,15 +263,12 @@ done
 # Setup aliases for all SSH connections loaded from config
 for k in "${(@k)valet_services}"; do
 
-
-
 	alias ssh${k}="${ssh_servers[$k]}"
 	alias ${k}="${ssh_servers[$k]}"
 
 done
 
 alias servers="listservers"
-
 
 # I always forget the common options.
 alias rsync2="echo 'rsync -azP server:/path/ path (Slashes are significant.)'"
@@ -249,8 +287,6 @@ alias be="bundle exec"
 alias rsua="bundle exec rake spec:unit:all"
 alias rsp="rake testbot:spec"
 
-
-
 ###############################################
 # NPM                                         #
 ###############################################
@@ -262,9 +298,11 @@ alias nr="npm run "
 ###############################################
 # Composer                                    #
 ###############################################
+alias c="composer"
 alias composer="COMPOSER_MEMORY_LIMIT=-1 composer"
 alias cin="composer install"
 alias cup="composer update"
+alias cupns="composer update --no-scripts"
 alias cupd="composer update --dry-run"
 alias cupcp='composer update && ga composer.lock && ga public/vendor && gc "Composer update" && gph'
 alias crq="composer require "
@@ -283,11 +321,26 @@ alias cupp="cupdatepackage "
 alias cupproject="composer_update_project "
 alias coutdated="composer outdated -D "
 alias cout="composer outdated -D "
+alias cr="composer run "
 
 alias ct="composer t"
 alias ctest="composer test"
 
 alias wptocomposer="wget https://raw.githubusercontent.com/pelmered/wp-to-composer/master/wp-to-composer.php && php wp-to-composer.php"
+alias wp2c="wptocomposer"
+
+###############################################
+# Custom Composer scripts                     #
+###############################################
+alias cq="composer queue"
+alias ci="composer insights"
+alias cif="composer insights-fix"
+alias cisf="composer insights-staged"
+alias cis="composer insights-staged-fix"
+alias cim="composer insights-modified"
+alias cimf="composer insights-modified-fix"
+alias cic="composer insights-local-committed"
+alias cicf="composer insights-local-committed-fix"
 
 ###############################################
 # Laravel                                     #
@@ -297,7 +350,12 @@ alias art="php artisan"
 alias a="art"
 alias at="artisan test"
 alias t="php artisan test"
+alias tf="php artisan test --filter "
 alias tp="t --parallel"
+alias tps="tp --stop-on-failure"
+alias sail='[ -f sail ] && sail || vendor/bin/sail'
+alias sa="sail artisan"
+
 
 ###############################################
 # Git                                         #
@@ -306,7 +364,8 @@ alias g="git"
 alias gl="git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr)%Creset' --abbrev-commit --date=relative"
 alias ga="git add"
 alias gap="git add -p"
-alias gc="git commit -m"
+#alias gc="git commit -m"
+alias gc="commit"
 alias gca="git commit -am"
 alias gs="git status"
 # Recursive git status (checks all subfolders)
@@ -322,17 +381,14 @@ alias gdss="git diff --cached --stat" # Summary of added files
 # for gco ("git commit only") and gca ("git commit all"), see functions.sh.
 alias gcaf="git add --all && gcof"
 alias gcof="git commit --no-verify -m"
-alias gcac="gca Cleanup."
-alias gcoc="gco Cleanup."
-alias gcaw="gca Whitespace."
 alias gpl='git pull origin $(git_current_branch)'
+#alias gph='gpl && git push origin $(git_current_branch)'
 alias gph='git push origin $(git_current_branch)'
-alias gpp='git pull --rebase && git push'
+alias gpp='git pull --rebase && gph'
 alias gpps='git stash && git pull --rebase && git push && git stash apply'
-alias gplh='git pull && git push origin $(git_current_branch)   '
+alias gplh='git pull && git push origin $(git_current_branch) '
 alias gppp="git push -u"  # Can't pull because you forgot to track? Run this.
 alias gps='(git stash --include-untracked | grep -v "No local changes to save") && gpp && git stash pop || echo "Fail!"'
-#alias go="git checkout"
 alias gco="git checkout"
 alias gb="git branch"
 alias gcb="git checkout -b"
@@ -343,21 +399,48 @@ alias gr="git branch -d"
 alias grr="git branch -D"
 alias gcp="git cherry-pick"
 alias gam="git commit --amend"
-alias gamm="git add --all && git commit --amend -C HEAD"
-alias gammf="gamm --no-verify"
 alias gba="git rebase --abort"
 alias gbc="git add -A && git rebase --continue"
 alias gbm="git fetch origin master && git rebase origin/master"
-alias gcleanignore=""
 alias grlc="git reset HEAD~" # Remove last commit
 alias gundo="grlc"
+alias gwip='git commit -a -m "wip"'
+alias gclean="git clean -fd"
+alias gcleani="git clean -fdi"
+alias grestore="git restore"
 
-#Merge current branch to master
+#Merge/rebase current branch to main
 alias gmb="git_merge_branch"
+alias gnb="git_new_branch"
 alias gmbb="gmb && gco $(git_current_branch)"
 alias gmbpb="gmb && gph && gco $(git_current_branch)"
 alias grb="git_rebase_branch"
 
+###############################################
+# Other / Misc                                #
+###############################################
+
+# Fast open
+alias o="open ."
+
+# PhpStorm
+alias phpstorm='open -a /Applications/PhpStorm.app "`pwd`"'
+
+# VSCode
+alias code='open -a "/Applications/Visual Studio Code.app" "`pwd`"'
+
+# Redis
+alias flush-redis="redis-cli FLUSHALL"
+
+# Lock the screen
+alias afk="osascript -e 'tell application \"System Events\" to keystroke \"q\" using {command down,control down}'"
+
+# Empty the Trash on all mounted volumes and the main HDD
+# Also, clear Apple’s System Logs to improve shell startup speed
+alias emptytrash="sudo rm -rfv /Volumes/*/.Trashes; sudo rm -rfv ~/.Trash; sudo rm -rfv /private/var/log/asl/*.asl"
+
+# Enable aliases to be sudo’ed
+alias sudo='sudo '
 
 # tmux
 alias ta="tmux attach"
@@ -371,3 +454,9 @@ alias rst="touch tmp/restart.txt && echo touched tmp/restart.txt"  # Passenger
 # Straight into console-in-screen.
 # Assumes there is only one screen running.
 alias prodc="ssh anpa -t screen -RD"
+
+# Show/hide hidden files in Finder
+alias show="defaults write com.apple.finder AppleShowAllFiles -bool true && killall Finder"
+alias hide="defaults write com.apple.finder AppleShowAllFiles -bool false && killall Finder"
+
+unalias mysql

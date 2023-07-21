@@ -11,22 +11,24 @@ function dotcomands() {
 
 # Watch command for Mac
 # usage: watch <your_command> <sleep_duration>
-# function watch() {
+
+#function watch() {
 #
-# 	command=$1;
-# 	sleep=$2;
+#  command=$1;
+#  sleep=$2;
 #
-# 	while :;
-# 		do
-# 		clear;
-# 		echo "$(date)"
+#  while :;
+#  do
+#  clear;
+#    echo "$(date)"
 #
-# 		echo "Running command: \"${command}\"";
-# 		eval $command;
-# 		echo "Sleeping for ${sleep} seconds";
-# 		sleep $sleep;
-# 	done
-# }
+#    echo "Running command: \"${command}\"";
+#    eval $command;
+#    echo "Sleeping for ${sleep} seconds";
+#    sleep $sleep;
+#  done
+#}
+
 
 # Sync folder every X seconds
 # usage: watch_sync <sync from> <sync to> <interval in seconds>
@@ -656,6 +658,19 @@ function tre() {
 }
 
 
+function commit() {
+   commitMessage="$*"
+
+   #git add .
+
+   if [ "$commitMessage" = "" ]; then
+      aicommits
+      return
+   fi
+
+   eval "git commit -m '${commitMessage}'"
+}
+
 ###############
 #
 # USAGE:
@@ -682,11 +697,14 @@ function git_merge_branch() {
 
 	#if (( ! ${+TARGET_BRANCH} )); then
 	if [[ -z $TARGET_BRANCH ]]; then
+    TARGET_BRANCH=$(get_dot_config ".git.${PWD}.branches.main" ".git.default.branches.main");
+	fi
+
+	if [[ -z $TARGET_BRANCH ]] || [[ "${TARGET_BRANCH}" = "" ]]; then
 		TARGET_BRANCH="master";
 	fi
 
 	if [[ -z $CURRENT_BRANCH ]] || [[ "${CURRENT_BRANCH}" = "master" ]]; then
-		#echo $CURRENT_BRANCH;
 		echo -n "Specify Git branch to merge: ";
 		read CURRENT_BRANCH
 	fi
@@ -704,6 +722,42 @@ function git_merge_branch() {
 		echo "Aborted"
 	fi
 
+}
+
+###############
+#
+# USAGE:
+#
+# Will create a new branch from main.
+#
+# Specify name for new branch. Source will be main
+# git_new_branch <new branch name>
+#
+# Specify source and target branch for merge
+# git_new_branch <new branch name> <source branch>
+#
+###############
+function git_new_branch() {
+	SOURCE_BRANCH=$2;
+	NEW_BRANCH_NAME=$1;
+
+  if [[ -z $CURRENT_BRANCH ]]; then
+    CURRENT_BRANCH=$(git_current_branch);
+  fi
+
+	if [[ -z $SOURCE_BRANCH ]]; then
+    SOURCE_BRANCH=$(get_dot_config ".git.${PWD}.branches.main" ".git.default.branches.main");
+	fi
+
+		if [[ -z $CURRENT_BRANCH ]] || [[ "${CURRENT_BRANCH}" = "${SOURCE_BRANCH}" ]]; then
+      "Already on source branch (${SOURCE_BRANCH})"
+      git pull origin ${SOURCE_BRANCH}
+      gco -b ${NEW_BRANCH_NAME}
+    else
+      gco ${SOURCE_BRANCH}
+      git pull origin ${SOURCE_BRANCH}
+      gco -b ${NEW_BRANCH_NAME}
+    fi
 }
 
 ###############
@@ -795,6 +849,7 @@ function gitpullall() {
 	do
 		echo $branch
 		echo "git pull origin ${branch}"
+		git pull origin ${branch}
 	done
 }
 
@@ -817,3 +872,84 @@ function gitpushall() {
 		sleep 5;
 	done
 }
+
+
+function create_ssh_aliases() {
+  identityMappings=($(yq -o=a -I=0 '.ssh.servers' ${DOTFILES_PATH}/config.yaml ))
+
+  #echo $identityMappings;
+
+  cur=""
+  host=""
+  user=""
+  host_key=""
+
+  //declare -A ssh_servers_array
+  typeset -A ssh_servers
+
+  for k in ${identityMappings}; do
+
+    if [[ $cur == "#" ]]; then
+      host=""
+      user=""
+    elif [[ $cur == "host:" ]]; then
+      host=$k
+    elif [[ $cur == "user:" ]]; then
+      user=$k
+    elif ([[ -z $host_key ]] && [[ ! -z $cur ]] && [[ ${cur:(-1)} = ":" ]]); then
+      host_key="${cur//:}"
+    fi
+
+    cur=$k;
+
+    if ([[ ! -z $host ]] && [[ ! -z $user ]]); then
+
+      alias ssh${host_key}="ssh ${user}@${host}"
+
+      ssh_servers[${host_key}]="${user}@${host}"
+
+      host=""
+      user=""
+      host_key=""
+      cur=""
+    fi
+
+  done
+
+  #export ssh_servers="${ssh_servers_array}"
+  export ssh_servers=(${ssh_servers})
+
+
+}
+
+function list_ssh_servers() {
+
+  echo "---------------"
+  echo "| SSH Servers | "
+  echo "---------------"
+
+	pad=$(printf '%0.1s' "."{1..60})
+
+	padlen=0;
+
+	# Get length of longest key
+	for k in ${(@k)ssh_servers}; do
+		if [ ${#k} -gt $padlen ]; then
+			padlen=${#k}
+		fi
+	done
+
+	# Add 3 padding to longest key
+	padlen=$padlen+3;
+
+	for k in ${(@k)ssh_servers}; do
+		printf '%s' "ssh${k} "
+		printf '%*.*s' 0 $((padlen - ${#k} )) "$pad"
+		printf '%s\n' "${ssh_servers[$k]}"
+		#${vagrant_boxes[$k]}=${${vagrant_boxes[$k]}:1}
+	done
+
+}
+
+
+
