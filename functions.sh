@@ -884,7 +884,7 @@ function create_ssh_aliases() {
   user=""
   host_key=""
 
-  //declare -A ssh_servers_array
+  # declare -A ssh_servers_array
   typeset -A ssh_servers
 
   for k in ${identityMappings}; do
@@ -917,7 +917,7 @@ function create_ssh_aliases() {
   done
 
   #export ssh_servers="${ssh_servers_array}"
-  export ssh_servers=(${ssh_servers})
+  #export ssh_servers=(${ssh_servers})
 
 
 }

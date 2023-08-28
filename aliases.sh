@@ -4,14 +4,13 @@
 # Machine and dotfiles Management             #
 ###############################################
 alias dotupdate="cd ~/.dotfiles && git pull && reload"
-alias dots="${DOTFILES_EDITOR} ~/.dotfiles"
+alias dots='$(get_dot_config ".dotfiles.editor") ~/.dotfiles'
 alias reload='source ~/.dotfiles/loader.sh && echo "sourced ~/.dotfiles/loader.sh" && exec zsh'
 
-alias hosts="${DOTFILES_EDITOR} /etc/hosts"
+alias hosts='sudo $(get_dot_config ".dotfiles.editor") /etc/hosts'
 alias khosts="knownhosts"
-alias knownhosts="${DOTFILES_EDITOR} ~/.ssh/known_hosts"
-
-alias dotconf="${DOTFILES_EDITOR} ~/.dotfiles/config.cfg"
+alias knownhosts='$(get_dot_config ".dotfiles.editor") ~/.ssh/known_hosts'
+alias dotconf='$(get_dot_config ".dotfiles.editor") ~/.dotfiles/config.cfg'
 alias .conf=dotconf
 
 # Get macOS Software Updates, and update installed Ruby gems, Homebrew, npm, and their installed packages
@@ -242,31 +241,17 @@ alias vlist="listboxes"
 alias .list="listboxes"
 alias boxes="listboxes"
 
-# Specific boxes. Loaded from config
-for k in "${(@k)vagrant_boxes}"; do
-
-	alias ${k}up="vagrantup ${k}"
-	alias ${k}upg="vagrantup ${k} gulpstart ${k}"
-	#alias ${k}upg="vagrantsuspendall && cd ${vagrant_boxes[$k]} && sleep 1 && vagrant up && gulpstart ${k}"
-	alias ${k}ssh="cd ${vagrant_boxes[$k]} && vagrant ssh"
-	alias ${k}reload="cd ${vagrant_boxes[$k]} && vagrant reload"
-	alias ${k}reprov="cd ${vagrant_boxes[$k]} && vagrant reload --provision"
-	alias ${k}sus="cd ${vagrant_boxes[$k]} && vagrant suspend"
-	alias ${k}cd="cd ${vagrant_boxes[$k]}"
-
-done
-
 ###############################################
 # Valet / Brew services                       #
 ###############################################
 
 # Setup aliases for all SSH connections loaded from config
-for k in "${(@k)valet_services}"; do
+#for k in "${(@k)valet_services}"; do
 
-	alias ssh${k}="${ssh_servers[$k]}"
-	alias ${k}="${ssh_servers[$k]}"
+#	alias ssh${k}="${ssh_servers[$k]}"
+#	alias ${k}="${ssh_servers[$k]}"
 
-done
+#done
 
 alias servers="listservers"
 
@@ -444,7 +429,7 @@ alias sudo='sudo '
 
 # tmux
 alias ta="tmux attach"
-# With tmux mouse mode on, just select text in a pane to copy.
+# With tmux mouse moAAto copy.
 # Then run tcopy to put it in the OS X clipboard (assuming reattach-to-user-namespace).
 alias tcopy="tmux show-buffer | pbcopy"
 
@@ -459,4 +444,4 @@ alias prodc="ssh anpa -t screen -RD"
 alias show="defaults write com.apple.finder AppleShowAllFiles -bool true && killall Finder"
 alias hide="defaults write com.apple.finder AppleShowAllFiles -bool false && killall Finder"
 
-unalias mysql
+#unalias mysql
