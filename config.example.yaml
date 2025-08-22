@@ -8,6 +8,9 @@ ssh:
    myhostkey: # comments are allowed
      host: 192.168.1.1
      user: myuser
+   name: # creates alias ssh + key, i.e. sshname
+     host: 192.168.1.2
+     user: myuser2
 
 git:
   default:
@@ -17,7 +20,7 @@ git:
   /Users/username/path/to/the/repo:
     branches:
       main: prod
-      dev: dev
+      dev: develop
 
 #Vagrant boxes
 vagrant:

@@ -1,5 +1,5 @@
 
-echo "Before installing you install:";
+echo "Before installing you install, you need:";
 echo " - Latest/desired version of PHP";
 echo " - Homebrew";
 echo "";
@@ -30,7 +30,7 @@ SHELL_TYPE=$1;
 
 ln -s ${DOTFILES_PATH}/gitignore .gitignore
 
-# Symlink Sublime text 2 to local bin so we can use "sublime [file]" to open file from terminal
+# Symlink Sublime text 2 to local bin so we can use "subl [file]" to open file from terminal
 ls -s /Applications/Sublime\ Text.app/Contents/SharedSupport/bin/subl /usr/local/bin/subl
 
 # Hide OS X Dock and remove show/hide delay

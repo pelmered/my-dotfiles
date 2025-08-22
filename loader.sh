@@ -15,7 +15,7 @@ function get_dot_config()
   if [ -n "$DEFAULT_CONFIG_KEY" ]; then
     echo $(yq e "${CONFIG_KEY} // ${DEFAULT_CONFIG_KEY}" ${DOTFILES_PATH}/config.yaml)
   else
-    echo $(yq e "${CONFIG_KEY}" ${DOTFILES_PATH}/config.yaml)
+    echo $(yq e ${CONFIG_KEY} ${DOTFILES_PATH}/config.yaml)
   fi
 }
 
@@ -24,8 +24,9 @@ function get_dot_config()
 #	export PATH="$PATH:${paths[$k]}";
 #done
 
-source ${DOTFILES_PATH}/functions.sh
 source ${DOTFILES_PATH}/aliases.sh
+source ${DOTFILES_PATH}/functions.sh
+source ${DOTFILES_PATH}/grebban.sh
 
 # Fix locale settings
 LANGUAGE=en_US.UTF-8
@@ -37,17 +38,16 @@ ssh-add --apple-use-keychain ~/.ssh/id_rsa
 
 #if [ -f $(brew --prefix)/etc/bash_completion ]; then source $(brew --prefix)/etc/bash_completion; fi
 
+valet_services=($(yq -o=a -I=0 '.valet.additional_services' ${DOTFILES_PATH}/config.yaml))
 
+# Setup SSH hosts aliases
 identityMappings=($(yq -o=a -I=0 '.ssh.servers' ${DOTFILES_PATH}/config.yaml ))
-
-#echo $identityMappings;
 
 cur=""
 host=""
 user=""
 host_key=""
 
-#declare -A ssh_servers_array
 typeset -A ssh_servers
 
 for k in ${identityMappings}; do

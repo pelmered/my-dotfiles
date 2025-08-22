@@ -633,9 +633,9 @@ function sublime() {
 # For this to work you need to create a launcher in you PATH: "Tools -> Create Command-line Launcher..."
 function phpstorm() {
 	if [ $# -eq 0 ]; then
-		open -a pstorm .;
+		open -a /Applications/PhpStorm.app .;
 	else
-		open -a pstorm "$@";
+		open -a /Applications/PhpStorm.app "$@";
 	fi;
 }
 
@@ -749,7 +749,7 @@ function git_new_branch() {
     SOURCE_BRANCH=$(get_dot_config ".git.${PWD}.branches.main" ".git.default.branches.main");
 	fi
 
-		if [[ -z $CURRENT_BRANCH ]] || [[ "${CURRENT_BRANCH}" = "${SOURCE_BRANCH}" ]]; then
+	if [[ -z $CURRENT_BRANCH ]] || [[ "${CURRENT_BRANCH}" = "${SOURCE_BRANCH}" ]]; then
       "Already on source branch (${SOURCE_BRANCH})"
       git pull origin ${SOURCE_BRANCH}
       gco -b ${NEW_BRANCH_NAME}
@@ -842,6 +842,41 @@ function valet_restart() {
   valet_start;
 }
 
+function herd_start() {
+  echo "Starting valet services...";
+  herd start;
+
+  echo "Starting additional services...";
+
+  serviceList=($(yq -o=a -I=0 '.herd.additional_services' ${DOTFILES_PATH}/config.yaml ))
+
+  for herd_service in ${serviceList};
+  do
+    brew services start $herd_service;
+  done
+}
+
+function herd_stop() {
+  echo "Stopping valet services...";
+  herd stop;
+
+  echo "Stopping additional services...";
+
+  serviceList=($(yq -o=a -I=0 '.herd.additional_services' ${DOTFILES_PATH}/config.yaml ))
+
+
+
+  for herd_service in ${serviceList};
+  do
+    brew services stop $herd_service;
+  done
+}
+
+function herd_restart() {
+  herd_stop;
+  herd_start;
+}
+
 
 function gitpullall() {
 
@@ -875,7 +910,7 @@ function gitpushall() {
 
 
 function create_ssh_aliases() {
-  identityMappings=($(yq -o=a -I=0 '.ssh.servers' ${DOTFILES_PATH}/config.yaml ))
+  serverList=($(yq -o=a -I=0 '.ssh.servers' ${DOTFILES_PATH}/config.yaml ))
 
   #echo $identityMappings;
 
@@ -887,7 +922,7 @@ function create_ssh_aliases() {
   # declare -A ssh_servers_array
   typeset -A ssh_servers
 
-  for k in ${identityMappings}; do
+  for k in ${serverList}; do
 
     if [[ $cur == "#" ]]; then
       host=""
@@ -951,5 +986,153 @@ function list_ssh_servers() {
 
 }
 
+function git_resign_commits() {
+  COMMIT_HASH=$1;
+
+	if [[ -z COMMIT_HASH ]]; then
+	  echo "You need to provide a commit hash"
+	  return;
+	fi
+
+  #gpg --list-secret-keys --keyid-format=long
+  #git config --global user.signingkey <your key>
+  git rebase --exec 'git commit --amend --no-edit -n -S' -i ${COMMIT_HASH}
+
+}
+
+function mysql_import() {
+
+  # Usage: mysql_import <path_to_sql_file.sql> "mysql -u <username> -p <database_name> -h <host>"
+
+  pv cat ${DOTFILES_PATH}/scripts/pre-mysql-import.sql \
+      $1 \
+      ${DOTFILES_PATH}/scripts/post-mysql-import.sql \
+  | mysql "${*:2}"
+
+  echo ""
+  echo "Import complete!"
+  echo ""
+}
+
+# Git worktree function to create new feature branches and open in Windsurf
+wt() {
+    # Check if feature name argument is provided
+    if [ -z "$1" ]; then
+        echo "Usage: wt <feature-name>"
+        echo "Example: wt my-feature"
+        return 1
+    fi
+
+    # Store the feature name from the first argument
+    local feature_name="$1"
+
+    # Check if we're in a git worktree
+    if git rev-parse --is-inside-work-tree &>/dev/null && git worktree list &>/dev/null; then
+        # Get the main worktree path (first line of git worktree list)
+        local main_worktree=$(git worktree list | head -n 1 | awk '{print $1}')
+        local current_project=$(basename "$main_worktree")
+        local parent_dir=$(dirname "$main_worktree")
+    else
+        # Fallback to current directory name and parent directory if not in git or not a worktree
+        local current_project=$(basename "$PWD")
+        local parent_dir=$(dirname "$PWD")
+    fi
+
+    local project_path="${parent_dir}/${current_project}"
+
+    # Create the worktrees folder name by appending '-worktrees' to current project name
+    local worktrees_folder="${current_project}-worktrees"
+
+    # Create the full path to the worktrees folder (adjacent to current project)
+    local worktrees_path="${parent_dir}/${worktrees_folder}"
+
+    # Create the worktrees folder if it doesn't exist
+    if [ ! -d "$worktrees_path" ]; then
+        echo "Creating worktrees folder: $worktrees_path"
+        mkdir -p "$worktrees_path"
+    fi
+
+    # Create the full path for the new feature worktree
+    local feature_path="${worktrees_path}/${feature_name}"
+
+    # Check if the feature worktree already exists
+    if [ -d "$feature_path" ]; then
+        echo "Worktree for '$feature_name' already exists at: $feature_path"
+        echo "Opening existing worktree in Windsurf..."
+    else
+        # Check if branch already exists
+        if git show-ref --verify --quiet "refs/heads/$feature_name"; then
+            # Branch exists, create worktree from existing branch
+            echo "Creating worktree from existing branch: $feature_name"
+            git worktree add "$feature_path" "$feature_name" --no-checkout
+        else
+            # Branch doesn't exist, create new branch and worktree
+            echo "Creating new worktree and branch: $feature_name"
+            git worktree add -b "$feature_name" "$feature_path" --no-checkout
+        fi
+    fi
+
+    # Checkout the branch without running hooks
+    cd "$feature_path"
+    git -c core.hooksPath=/dev/null checkout "$feature_name"
+    cd - > /dev/null
+
+    # Check if the worktree creation was successful
+    if [ $? -ne 0 ]; then
+        echo "Failed to create worktree. Make sure you're in a git repository."
+        return 1
+    fi
+
+    echo "Successfully created worktree: $feature_path"
+
+    # Copy .env file if it exists
+    if [ -f "$project_path/.env" ]; then
+      cp "$project_path/.env" "$feature_path/.env"
+      echo "Copied .env into workspace"
+
+      cp "$feature_path/.env" "$feature_path/.env.backup"
+      sed -i.bak "s|^APP_URL=.*|APP_URL=http://${feature_name}.test|" "$feature_path/.env"
+      sed -i.bak "s|^APP_DOMAIN=.*|APP_DOMAIN=${feature_name}.test|" "$feature_path/.env"
+    else
+      echo "No .env found in workspace"
+      echo $project_path
+    fi
+
+    cd $feature_path
+
+    # Run composer install if there is a composer.json file
+    if [ -f "$feature_path/composer.json" ]; then
+      echo "Installing composer dependencies..."
+      composer install -q
+      echo "Composer Dependencies installed!"
+    else
+      echo "No composer.json found in workspace"
+    fi
+
+    if [ -f "$feature_path/package.json" ]; then
+      echo "Installing NPM dependencies..."
+      npm install --silent
+      echo "Building..."
+      npm run --silent build &> '/dev/null'
+      echo "NPM Dependencies installed & built!"
+    else
+      echo "No package.json found in workspace"
+    fi
+
+   mkdir -p $feature_path/storage/framework/cache
 
 
+    # Open the feature worktree in a new Windsurf window
+    echo "Opening $feature_path in PHPStorm..."
+    phpstorm "$feature_path"
+
+    # Check if Windsurf opened successfully
+    if [ $? -eq 0 ]; then
+        echo "Windsurf opened successfully!"
+    else
+        echo "Note: Make sure Windsurf is installed and available in your PATH"
+        echo "You can manually open: $feature_path"
+    fi
+
+    echo "Access the branch at http://${feature_name}.test"
+}

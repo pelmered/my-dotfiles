@@ -110,6 +110,7 @@ brew install xz
 brew install yarn
 brew install zsh
 brew install zsh-completions
+brew install zoxide
 
 
 # Remove outdated versions from the cellar.

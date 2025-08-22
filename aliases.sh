@@ -4,13 +4,13 @@
 # Machine and dotfiles Management             #
 ###############################################
 alias dotupdate="cd ~/.dotfiles && git pull && reload"
-alias dots='$(get_dot_config ".dotfiles.editor") ~/.dotfiles'
-alias reload='source ~/.dotfiles/loader.sh && echo "sourced ~/.dotfiles/loader.sh" && exec zsh'
+alias dots='$(get_dot_config ".text_editor") ~/.dotfiles'
+alias reload='source ~/.dotfiles/loader.sh && echo "sourced ~/.dotfiles/loader.sh"'
 
-alias hosts='sudo $(get_dot_config ".dotfiles.editor") /etc/hosts'
+alias hosts='sudo $(get_dot_config ".text_editor") /etc/hosts'
 alias khosts="knownhosts"
-alias knownhosts='$(get_dot_config ".dotfiles.editor") ~/.ssh/known_hosts'
-alias dotconf='$(get_dot_config ".dotfiles.editor") ~/.dotfiles/config.cfg'
+alias knownhosts='$(get_dot_config ".text_editor") ~/.ssh/known_hosts'
+alias dotconf='$(get_dot_config ".text_editor") ~/.dotfiles/config.yaml'
 alias .conf=dotconf
 
 # Get macOS Software Updates, and update installed Ruby gems, Homebrew, npm, and their installed packages
@@ -62,7 +62,8 @@ alias ip="dig +short myip.opendns.com @resolver1.opendns.com"
 ###############################################
 # Applications                                #
 ###############################################
-alias s='sublime'
+alias s='subl' # Sublime Text
+alias sublime='subl'
 alias p='phpstorm'
 alias v='vim'
 alias n='nano'
@@ -196,6 +197,7 @@ alias servers="listservers"
 # Docker                                      #
 ###############################################
 
+alias dc="docker-compose"
 alias dup="docker-compose up -d"
 alias ddown="docker-compose down"
 #alias dd="ddown"
@@ -211,35 +213,34 @@ alias dcbuild="docker-compose up -d --force-recreate --build"
 
 alias dcbash='docker-compose exec --user root phpfpm bash'
 
+###############################################
+# Kubernetes                                  #
+###############################################
+
+alias k="kubectl"
+alias kctx="kubectx"
+alias kns="kubens"
+alias ka="kubectl apply -f"
+alias kdel="kubectl delete -f"
+alias kget="kubectl get"
+alias kg="kget"
+alias kdescribe="kubectl describe"
+alias kd="kdescribe"
+alias klogs="kubectl logs"
+alias kl="klogs"
+alias kexec="kubectl exec"
+alias kex="kexec"
+alias ke="kexec"
+alias kport="kubectl port-forward"
+
+
+
 
 ###############################################
 # MySQL                                     #
 ###############################################
 
 alias cpdb="copy_database"
-
-
-###############################################
-# Vagrant                                     #
-###############################################
-
-# Generic. Can be run on any vagrant box.
-# Must to be run from Vagrant folder (the folder that contains the Vagrantfile)
-alias vup="vagrant up"
-alias vssh="vagrant ssh"
-alias vreload="vagrant reload"
-alias vreloadpro="vagrant reload --provision"
-alias vre="vreload"
-alias vpre="vreloadpro"
-alias vreprov="vreloadpro"
-alias vprov="vagrant provision"
-alias vsus="vagrant suspend"
-alias vst="vagrant status"
-alias vbu="vagrant box update"
-
-alias vlist="listboxes"
-alias .list="listboxes"
-alias boxes="listboxes"
 
 ###############################################
 # Valet / Brew services                       #
@@ -275,7 +276,7 @@ alias rsp="rake testbot:spec"
 ###############################################
 # NPM                                         #
 ###############################################
-alias nin="npm install && say -v Fiona 'WooooooHoo, Great success!'"
+alias nin="npm install && say -v 'Good News' 'WooooooHoo, Great success!'"
 alias nup="npm update"
 alias nupcp='npm update && ga package-lock.json && gc "NPM update" && gph'
 alias nr="npm run "
@@ -341,6 +342,10 @@ alias tps="tp --stop-on-failure"
 alias sail='[ -f sail ] && sail || vendor/bin/sail'
 alias sa="sail artisan"
 
+###############################################
+# Deployer                                         #
+###############################################
+alias dep='vendor/bin/dep'
 
 ###############################################
 # Git                                         #
@@ -349,8 +354,8 @@ alias g="git"
 alias gl="git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr)%Creset' --abbrev-commit --date=relative"
 alias ga="git add"
 alias gap="git add -p"
-#alias gc="git commit -m"
-alias gc="commit"
+alias gc="git commit -m"
+#alias gc="commit"
 alias gca="git commit -am"
 alias gs="git status"
 # Recursive git status (checks all subfolders)
@@ -393,6 +398,7 @@ alias gwip='git commit -a -m "wip"'
 alias gclean="git clean -fd"
 alias gcleani="git clean -fdi"
 alias grestore="git restore"
+alias gresign="!f() { git rebase --exec 'git commit --amend --no-edit -n -S' -i \"$1\"; }; f"
 
 #Merge/rebase current branch to main
 alias gmb="git_merge_branch"
@@ -402,8 +408,28 @@ alias gmbpb="gmb && gph && gco $(git_current_branch)"
 alias grb="git_rebase_branch"
 
 ###############################################
+# GitHub CoPilot                              #
+###############################################
+
+alias copilot="gh copilot"
+alias gcs='gh copilot suggest'
+alias gce='gh copilot explain'
+
+###############################################
+# Python                                      #
+###############################################
+
+alias py="python3"
+alias python="python3"
+alias pip="pip3"
+
+
+###############################################
 # Other / Misc                                #
 ###############################################
+
+# Show current path
+alias whereami='echo $PWD'
 
 # Fast open
 alias o="open ."
