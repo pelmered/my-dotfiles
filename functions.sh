@@ -1016,15 +1016,31 @@ function mysql_import() {
 
 # Git worktree function to create new feature branches and open in Windsurf
 wt() {
-    # Check if feature name argument is provided
-    if [ -z "$1" ]; then
-        echo "Usage: wt <feature-name>"
-        echo "Example: wt my-feature"
+    # Parse arguments: first positional is the feature name; flags are order-independent.
+    local feature_name=""
+    local open_editor=true
+    local run_install=true
+    local run_build=true
+    local do_herd=true
+    local setup_errors=()
+    for arg in "$@"; do
+        case "$arg" in
+            --no-open|--no-editor|-n) open_editor=false ;;
+            --no-install|--no-deps)   run_install=false; run_build=false ;;
+            --no-build)               run_build=false ;;
+            --no-herd|--no-link)      do_herd=false ;;
+            -*) echo "Unknown option: $arg"; return 1 ;;
+            *)  [ -z "$feature_name" ] && feature_name="$arg" ;;
+        esac
+    done
+
+    if [ -z "$feature_name" ]; then
+        echo "Usage: wt <feature-name> [--no-open] [--no-install] [--no-build] [--no-herd]"
+        echo "  wt my-feature            # worktree + deps + 'herd link --secure' + open editor"
+        echo "  wt my-feature --no-open  # same, but don't open the editor (scripts/agents)"
+        echo "  Editor override: WT_EDITOR=cursor wt my-feature"
         return 1
     fi
-
-    # Store the feature name from the first argument
-    local feature_name="$1"
 
     # Check if we're in a git worktree
     if git rev-parse --is-inside-work-tree &>/dev/null && git worktree list &>/dev/null; then
@@ -1055,10 +1071,23 @@ wt() {
     # Create the full path for the new feature worktree
     local feature_path="${worktrees_path}/${feature_name}"
 
+    # Git stores branches as files under refs/heads, so a branch named
+    # 'feature' cannot coexist with 'feature/...'. Detect that collision up
+    # front and explain it instead of failing deep inside 'git worktree add'.
+    if git rev-parse --is-inside-work-tree &>/dev/null; then
+        local nested_branches=$(git for-each-ref --format='%(refname:short)' "refs/heads/${feature_name}/" 2>/dev/null)
+        if [ -n "$nested_branches" ]; then
+            echo "Error: can't create branch '$feature_name' — these branches already live under '$feature_name/':"
+            echo "$nested_branches" | sed 's/^/  /'
+            echo "Pick a different name (git can't have both a branch '$feature_name' and '$feature_name/...')."
+            return 1
+        fi
+    fi
+
     # Check if the feature worktree already exists
     if [ -d "$feature_path" ]; then
         echo "Worktree for '$feature_name' already exists at: $feature_path"
-        echo "Opening existing worktree in Windsurf..."
+        echo "Re-running setup for existing worktree..."
     else
         # Check if branch already exists
         if git show-ref --verify --quiet "refs/heads/$feature_name"; then
@@ -1070,6 +1099,13 @@ wt() {
             echo "Creating new worktree and branch: $feature_name"
             git worktree add -b "$feature_name" "$feature_path" --no-checkout
         fi
+
+        # Abort if 'git worktree add' failed (e.g. branch-name conflict) so we
+        # don't cascade into a failed cd/checkout in the wrong directory.
+        if [ ! -d "$feature_path" ]; then
+            echo "Failed to create worktree. Make sure you're in a git repository."
+            return 1
+        fi
     fi
 
     # Checkout the branch without running hooks
@@ -1077,13 +1113,39 @@ wt() {
     git -c core.hooksPath=/dev/null checkout "$feature_name"
     cd - > /dev/null
 
-    # Check if the worktree creation was successful
-    if [ $? -ne 0 ]; then
-        echo "Failed to create worktree. Make sure you're in a git repository."
-        return 1
-    fi
-
     echo "Successfully created worktree: $feature_path"
+
+    # Symlink shared directories from main worktree (if they exist)
+    # Directories without git-tracked files are symlinked entirely.
+    # Directories with tracked files: only untracked items are symlinked
+    # so git can manage tracked files independently per branch.
+    local shared_dirs=(".ai" ".chief" ".claude" "docs/features" "docs/prototypes" "storage/app")
+    for dir in "${shared_dirs[@]}"; do
+        if [ -d "$project_path/$dir" ]; then
+            mkdir -p "$feature_path/$(dirname "$dir")"
+            local tracked_files=$(cd "$project_path" && git ls-files "$dir" 2>/dev/null)
+            if [ -z "$tracked_files" ]; then
+                # No tracked files - symlink the entire directory
+                rm -rf "$feature_path/$dir"
+                ln -s "$project_path/$dir" "$feature_path/$dir"
+                echo "Symlinked $dir/"
+            else
+                # Has tracked files - only symlink untracked items
+                mkdir -p "$feature_path/$dir"
+                for item in "$project_path/$dir"/*(N) "$project_path/$dir"/.*(N); do
+                    [ -e "$item" ] || continue
+                    local item_name=$(basename "$item")
+                    [[ "$item_name" == "." || "$item_name" == ".." ]] && continue
+                    local item_tracked=$(cd "$project_path" && git ls-files "$dir/$item_name" 2>/dev/null)
+                    if [ -z "$item_tracked" ]; then
+                        rm -rf "$feature_path/$dir/$item_name"
+                        ln -s "$item" "$feature_path/$dir/$item_name"
+                        echo "Symlinked $dir/$item_name"
+                    fi
+                done
+            fi
+        fi
+    done
 
     # Copy .env file if it exists
     if [ -f "$project_path/.env" ]; then
@@ -1101,20 +1163,40 @@ wt() {
     cd $feature_path
 
     # Run composer install if there is a composer.json file
-    if [ -f "$feature_path/composer.json" ]; then
+    if [ "$run_install" = true ] && [ -f "$feature_path/composer.json" ]; then
       echo "Installing composer dependencies..."
-      composer install -q
-      echo "Composer Dependencies installed!"
+      if composer install -q; then
+        echo "Composer Dependencies installed!"
+      else
+        echo "⚠ composer install FAILED"
+        setup_errors+=("composer install — fix: (cd $feature_path && composer install)")
+      fi
+    elif [ "$run_install" = false ]; then
+      echo "Skipped composer install (--no-install)"
     else
       echo "No composer.json found in workspace"
     fi
 
-    if [ -f "$feature_path/package.json" ]; then
+    if [ "$run_install" = true ] && [ -f "$feature_path/package.json" ]; then
       echo "Installing NPM dependencies..."
-      npm install --silent
-      echo "Building..."
-      npm run --silent build &> '/dev/null'
-      echo "NPM Dependencies installed & built!"
+      if npm install --silent; then
+        if [ "$run_build" = true ]; then
+          echo "Building..."
+          if npm run --silent build &> '/dev/null'; then
+            echo "NPM Dependencies installed & built!"
+          else
+            echo "⚠ npm run build FAILED"
+            setup_errors+=("npm build — fix: (cd $feature_path && npm run build)")
+          fi
+        else
+          echo "NPM Dependencies installed (skipped build, --no-build)"
+        fi
+      else
+        echo "⚠ npm install FAILED"
+        setup_errors+=("npm install — fix: (cd $feature_path && npm install && npm run build)")
+      fi
+    elif [ "$run_install" = false ]; then
+      echo "Skipped npm install/build (--no-install)"
     else
       echo "No package.json found in workspace"
     fi
@@ -1122,17 +1204,145 @@ wt() {
    mkdir -p $feature_path/storage/framework/cache
 
 
-    # Open the feature worktree in a new Windsurf window
-    echo "Opening $feature_path in PHPStorm..."
-    phpstorm "$feature_path"
-
-    # Check if Windsurf opened successfully
-    if [ $? -eq 0 ]; then
-        echo "Windsurf opened successfully!"
+    # Link + secure the site in Herd. The wildcard cert/server_name (*.{name}.test)
+    # this creates covers every subdomain (wellness., advisor., admin., ...) in one shot.
+    if [ "$do_herd" = true ]; then
+        if command -v herd &>/dev/null; then
+            echo "Linking site in Herd (herd link $feature_name --secure)..."
+            if herd link "$feature_name" --secure; then
+                echo "Site secured at https://${feature_name}.test (and *.${feature_name}.test)"
+            else
+                echo "⚠ herd link FAILED"
+                setup_errors+=("herd link — fix: (cd $feature_path && herd link $feature_name --secure)")
+            fi
+        else
+            echo "Note: 'herd' not found in PATH — skipping site link"
+        fi
     else
-        echo "Note: Make sure Windsurf is installed and available in your PATH"
-        echo "You can manually open: $feature_path"
+        echo "Skipped Herd link (--no-herd)"
+    fi
+
+    # Open the worktree in the editor (default phpstorm; override with $WT_EDITOR). Skip with --no-open.
+    if [ "$open_editor" = true ]; then
+        local editor_cmd="${WT_EDITOR:-phpstorm}"
+        echo "Opening $feature_path in ${editor_cmd}..."
+        if "$editor_cmd" "$feature_path"; then
+            echo "Editor opened successfully!"
+        else
+            echo "Note: couldn't open '$editor_cmd'. Open manually: $feature_path"
+        fi
+    else
+        echo "Skipped opening editor (--no-open)"
     fi
 
     echo "Access the branch at http://${feature_name}.test"
+
+    # Worktree is fully wired even if a dependency step failed — report the recoverable
+    # bits (idempotent re-runs) at the end and exit non-zero so callers can detect it.
+    if [ ${#setup_errors[@]} -gt 0 ]; then
+        echo ""
+        echo "⚠ Worktree created, but ${#setup_errors[@]} setup step(s) failed — worktree is usable, just re-run:"
+        for e in "${setup_errors[@]}"; do
+            echo "  • $e"
+        done
+        return 1
+    fi
+}
+
+wtr() {
+    # Check if we're in a git repository
+    if ! git rev-parse --is-inside-work-tree &>/dev/null; then
+        echo "Error: Not in a git repository"
+        return 1
+    fi
+
+    local target_name="$1"
+
+    # Get the main worktree path (first line of git worktree list)
+    local main_worktree=$(git worktree list | head -n 1 | awk '{print $1}')
+    local worktree_path
+
+    if [ -n "$target_name" ]; then
+        # Named mode: resolve the worktree path under the worktrees folder used by 'wt'
+        local current_project=$(basename "$main_worktree")
+        local parent_dir=$(dirname "$main_worktree")
+        local worktrees_path="${parent_dir}/${current_project}-worktrees"
+        worktree_path="${worktrees_path}/${target_name}"
+
+        if [ ! -d "$worktree_path" ]; then
+            echo "Error: Worktree '$target_name' not found at: $worktree_path"
+            return 1
+        fi
+    else
+        # Current-worktree mode: must not be the main worktree
+        local current_path=$(pwd)
+        if [ "$current_path" = "$main_worktree" ]; then
+            echo "Error: You are in the main worktree, not a feature worktree"
+            echo "Use this command from within a worktree created by 'wt'"
+            echo "Or specify a worktree name: wtr <name>"
+            return 1
+        fi
+        worktree_path=$(git rev-parse --show-toplevel)
+    fi
+
+    local worktree_name=$(basename "$worktree_path")
+    local current_branch=$(git -C "$worktree_path" rev-parse --abbrev-ref HEAD)
+    local has_warnings=false
+
+    echo "Removing worktree: $worktree_name"
+    echo "Path: $worktree_path"
+    echo ""
+
+    # Check for uncommitted changes
+    local uncommitted_files=$(git -C "$worktree_path" status --porcelain)
+    if [ -n "$uncommitted_files" ]; then
+        has_warnings=true
+        echo "WARNING: You have uncommitted changes:"
+        echo "─────────────────────────────────────"
+        git -C "$worktree_path" status --short
+        echo ""
+    fi
+
+    # Prompt for confirmation if there are uncommitted changes
+    if [ "$has_warnings" = true ]; then
+        echo "These changes will be LOST if you continue!"
+        echo -n "Are you sure you want to remove this worktree? [y/N] "
+        read -k 1 REPLY
+        echo ""
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            echo "Aborted."
+            return 1
+        fi
+    fi
+
+    # Push any commits before removing
+    echo "Pushing '$current_branch' to remote..."
+    git -C "$worktree_path" push -u origin "$current_branch" 2>/dev/null || git -C "$worktree_path" push origin "$current_branch"
+
+    # Change to main worktree first (required before removing if we were inside the target)
+    cd "$main_worktree"
+
+    # Remove the worktree (--force to remove even with changes)
+    if git worktree remove "$worktree_path" --force; then
+        echo "Successfully removed worktree: $worktree_name"
+
+        # Prune any stale worktree references
+        git worktree prune
+
+        echo "Returned to main project: $main_worktree"
+    else
+        echo "Error: Failed to remove worktree"
+        return 1
+    fi
+}
+
+git_fetch_and_checkout() {
+  BRANCH_NAME=$1;
+
+  if [[ -z $BRANCH_NAME ]]; then
+    echo "You need to provide a branch name"
+    return;
+  fi
+
+  git fetch origin ${BRANCH_NAME} && git checkout ${BRANCH_NAME} && git pull origin ${BRANCH_NAME};
 }

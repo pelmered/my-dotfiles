@@ -80,6 +80,17 @@ alias spoton="sudo mdutil -a -i on"
 alias chrome='/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome'
 alias canary='/Applications/Google\ Chrome\ Canary.app/Contents/MacOS/Google\ Chrome\ Canary'
 
+
+###############################################
+# Claude code                                 #
+###############################################
+alias cc="claude --dangerously-skip-permissions"
+alias ccr="claude --dangerously-skip-permissions --resume"
+alias cc-max="claude --model opus --effort max  --dangerously-skip-permissions"
+alias cc-opus="claude --model opus  --dangerously-skip-permissions"
+alias cc-sonnet="claude --model sonnet  --dangerously-skip-permissions"
+alias cc-up="claude update && claude --dangerously-skip-permissions"
+
 ###############################################
 # Utilities                                   #
 ###############################################
@@ -309,7 +320,7 @@ alias coutdated="composer outdated -D "
 alias cout="composer outdated -D "
 alias cr="composer run "
 
-alias ct="composer t"
+alias ct="composer test"
 alias ctest="composer test"
 
 alias wptocomposer="wget https://raw.githubusercontent.com/pelmered/wp-to-composer/master/wp-to-composer.php && php wp-to-composer.php"
@@ -327,6 +338,7 @@ alias cim="composer insights-modified"
 alias cimf="composer insights-modified-fix"
 alias cic="composer insights-local-committed"
 alias cicf="composer insights-local-committed-fix"
+alias fix="composer run fix"
 
 ###############################################
 # Laravel                                     #
@@ -335,7 +347,7 @@ alias cicf="composer insights-local-committed-fix"
 alias art="php artisan"
 alias a="art"
 alias at="artisan test"
-alias t="php artisan test"
+alias t="composer run test"
 alias tf="php artisan test --filter "
 alias tp="t --parallel"
 alias tps="tp --stop-on-failure"
@@ -380,7 +392,10 @@ alias gplh='git pull && git push origin $(git_current_branch) '
 alias gppp="git push -u"  # Can't pull because you forgot to track? Run this.
 alias gps='(git stash --include-untracked | grep -v "No local changes to save") && gpp && git stash pop || echo "Fail!"'
 alias gco="git checkout"
+alias gfco="git_fetch_and_checkout"
 alias gb="git branch"
+alias gbl="git branch -l" # List branches
+alias gnb="gco main && gpl && gco -b" # Create new branch from main
 alias gcb="git checkout -b"
 alias got="git checkout -"
 alias gom="git checkout master"
@@ -402,7 +417,7 @@ alias gresign="!f() { git rebase --exec 'git commit --amend --no-edit -n -S' -i 
 
 #Merge/rebase current branch to main
 alias gmb="git_merge_branch"
-alias gnb="git_new_branch"
+#alias gnb="git_new_branch"
 alias gmbb="gmb && gco $(git_current_branch)"
 alias gmbpb="gmb && gph && gco $(git_current_branch)"
 alias grb="git_rebase_branch"
@@ -414,6 +429,12 @@ alias grb="git_rebase_branch"
 alias copilot="gh copilot"
 alias gcs='gh copilot suggest'
 alias gce='gh copilot explain'
+
+###############################################
+# Godot                                      #
+###############################################
+
+alias godot="/Applications/Godot.app/Contents/MacOS/Godot"
 
 ###############################################
 # Python                                      #

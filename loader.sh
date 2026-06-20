@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-DOTFILES_PATH=$( cd $(dirname $0) ; pwd -P );
+#DOTFILES_PATH=$( cd $(dirname $0) ; pwd -P );
+DOTFILES_PATH="${DOTFILES_PATH:-$( cd $(dirname $0) ; pwd -P )}"
 
 #source ${DOTFILES_PATH}/config.cfg;
 
@@ -34,7 +35,7 @@ export LC_CTYPE=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 
 # Add SSH key for forward agent
-ssh-add --apple-use-keychain ~/.ssh/id_rsa
+#ssh-add --apple-use-keychain ~/.ssh/id_rsa
 
 #if [ -f $(brew --prefix)/etc/bash_completion ]; then source $(brew --prefix)/etc/bash_completion; fi
 
